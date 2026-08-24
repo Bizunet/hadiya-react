@@ -25,11 +25,23 @@ export function AppProvider({ children }) {
     return lang === "am" ? am : en;
   }
 
-  function login(name, id) {
-    setUser({ name, id });
+  async function login(employeeId, password) {
+    const data = await request("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ employeeId, password }),
+    });
+
+    localStorage.setItem("authToken", data.token);
+    setUser(data.user);
   }
-  function register(name, id) {
-    setUser({ name, id });
+  async function register(fullName, email, employeeId, password) {
+    const data = await request("/api/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({ fullName, email, employeeId, password }),
+    });
+
+    localStorage.setItem("authToken", data.token);
+    setUser(data.user);
   }
   function logout() {
     setUser(null);
@@ -48,4 +60,45 @@ export function useApp() {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error("useApp must be used within AppProvider");
   return ctx;
+}
+
+const API_URL = "http://localhost:3000";
+
+async function request(path, options) {
+  const response = await fetch(`${API_URL}${path}`, {
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Request failed");
+  }
+
+  return data;
+}
+
+async function handleSubmit(e) {
+  e.preventDefault();
+
+  const nextErrors = validate();
+
+  if (Object.keys(nextErrors).length > 0) {
+    setErrors(nextErrors);
+    return;
+  }
+
+  try {
+    await register(
+      form.fullName.trim(),
+      form.email.trim(),
+      form.employeeId.trim(),
+      form.password
+    );
+
+    navigate("/report");
+  } catch (error) {
+    setErrors({ server: error.message });
+  }
 }

@@ -7,18 +7,24 @@ import { IconLock, IconInfo } from "../components/Icons";
 export default function Login() {
   const { t, user, login } = useApp();
   const navigate = useNavigate();
-  const [name, setName] = useState("");
   const [id, setId] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
+  const [serverError, setServerError] = useState("");
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!name.trim() || !id.trim()) {
+    if (!id.trim() || !password.trim()) {
       setError(true);
       return;
     }
-    login(name.trim(), id.trim());
-    navigate("/report");
+
+    try {
+      await login(id.trim(), password);
+      navigate("/report");
+    } catch (requestError) {
+      setServerError(requestError.message);
+    }
   }
 
   return (
@@ -52,13 +58,8 @@ export default function Login() {
 
               <form onSubmit={handleSubmit}>
                 <h3>{t("Employee Sign In", "የሰራተኛ መግቢያ")}</h3>
-                <p className="sub">{t("Enter your name and employee ID to continue.", "ለመቀጠል ስምዎንና የሰራተኛ መለያ ቁጥርዎን ያስገቡ።")}</p>
-
-                <div className={`field${error && !name.trim() ? " has-error" : ""}`}>
-                  <label>{t("Full Name *", "ሙሉ ስም *")}</label>
-                  <input type="text" className={error && !name.trim() ? "invalid" : ""} value={name} onChange={(e) => setName(e.target.value)} placeholder={t("e.g. Abebe Kebede", "ለምሳሌ አበበ ከበደ")} />
-                  <div className="err-msg" style={{ display: error && !name.trim() ? "block" : "none" }}>{t("Please enter your name.", "እባክዎ ስምዎን ያስገቡ።")}</div>
-                </div>
+                <p className="sub">{t("Enter your employee ID and password to continue.", "ለመቀጠል የሰራተኛ መለያ ቁጥርዎንና የይለፍ ቃልዎን ያስገቡ።")}</p>
+                {serverError && <div className="err-msg" style={{ display: "block" }}>{serverError}</div>}
 
                 <div className={`field${error && !id.trim() ? " has-error" : ""}`}>
                   <label>{t("Employee ID *", "የሰራተኛ መለያ ቁጥር *")}</label>
@@ -67,9 +68,8 @@ export default function Login() {
                 </div>
 
                 <div className="field">
-                  <label>{t("Password", "የይለፍ ቃል")}</label>
-                  <input type="password" placeholder="••••••••" />
-                  <div className="hint">{t("Demo only — any value works for now.", "ለናሙና ብቻ — ማንኛውም ግቤት ይሰራል።")}</div>
+                  <label>{t("Password *", "የይለፍ ቃል *")}</label>
+                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
                 </div>
 
                 <button type="submit" className="btn btn-deep btn-block">

@@ -29,7 +29,7 @@ export default function Signup() {
     return nextErrors;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const nextErrors = validate();
     if (Object.keys(nextErrors).length > 0) {
@@ -37,8 +37,17 @@ export default function Signup() {
       return;
     }
 
-    register(form.fullName.trim(), form.employeeId.trim());
-    navigate("/report");
+    try {
+      await register(
+        form.fullName.trim(),
+        form.email.trim(),
+        form.employeeId.trim(),
+        form.password,
+      );
+      navigate("/report");
+    } catch (requestError) {
+      setErrors({ server: requestError.message });
+    }
   }
 
   return (
@@ -79,6 +88,7 @@ export default function Signup() {
               <form onSubmit={handleSubmit}>
                 <h3>{t("Create an employee account", "የሰራተኛ መለያ ይፍጠሩ")}</h3>
                 <p className="sub">{t("Set up your profile to submit reports securely.", "ሪፖርቶችን በደህና ለማስገባት መለያዎን ያዘጋጁ።")}</p>
+                {errors.server && <div className="err-msg" style={{ display: "block" }}>{errors.server}</div>}
 
                 <div className={`field${errors.fullName ? " has-error" : ""}`}>
                   <label>{t("Full Name *", "ሙሉ ስም *")}</label>
