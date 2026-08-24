@@ -1,0 +1,200 @@
+import { useEffect, useRef, useState } from "react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { useApp } from "../context/AppContext";
+import { SealBrand, SealFooter } from "./Seal";
+import {
+  IconPhone, IconMail, IconPin, IconSun, IconMoon, IconMenu,
+  IconFileReport, IconUsers, IconChevronDown,
+} from "./Icons";
+
+function Topbar() {
+  const { lang, setLang, theme, setTheme } = useApp();
+  return (
+    <div className="topbar">
+      <div className="wrap">
+        <div className="topbar-info">
+          <span><IconPhone width={14} height={14} /><span>+251 46 XXX XXXX</span></span>
+          <span><IconMail width={14} height={14} /><span>hzpsd.hr@ethiopia.gov.et</span></span>
+          <span><IconPin width={14} height={14} /><span>{lang === "am" ? "ሆሳዕና፣ የሀድያ ዞን" : "Hosaena, Hadiya Zone"}</span></span>
+        </div>
+        <div className="topbar-controls">
+          <div className="lang-switch" role="group" aria-label="Language selector">
+            <button className={lang === "en" ? "active" : ""} onClick={() => setLang("en")}>EN</button>
+            <button className={lang === "am" ? "active" : ""} onClick={() => setLang("am")}>አማ</button>
+          </div>
+          <button
+            className="theme-toggle"
+            aria-label="Toggle dark mode"
+            aria-pressed={theme === "dark"}
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            <IconSun className="ic-sun" width={16} height={16} />
+            <IconMoon className="ic-moon" width={16} height={16} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Header() {
+  const { t, user, logout } = useApp();
+  const location = useLocation();
+  const [navOpen, setNavOpen] = useState(false);
+  const [ddOpen, setDdOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const ddRef = useRef(null);
+
+  useEffect(() => {
+    function onScroll() { setScrolled(window.scrollY > 24); }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    setNavOpen(false);
+    setDdOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    function onDocClick(e) {
+      if (ddRef.current && !ddRef.current.contains(e.target)) setDdOpen(false);
+    }
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, []);
+
+  const isServicesArea = ["/services", "/report", "/administrators"].includes(location.pathname);
+
+  return (
+    <header className={`site-header${scrolled ? " scrolled" : ""}`}>
+      <div className="wrap nav">
+        <Link to="/" className="brand">
+          <span className="seal"><SealBrand /></span>
+          <span className="brand-text">
+            <span className="am">የሀድያ ዞን ፐብሊክ ሰርቪስና የሰዉ ኃብት ልማት መምሪያ</span>
+            <span className="en">Hadiya Zone Public Service &amp; HR Development</span>
+          </span>
+        </Link>
+
+        <button className="nav-toggle" aria-label="Toggle menu" aria-expanded={navOpen} onClick={() => setNavOpen((v) => !v)}>
+          <IconMenu width={26} height={26} />
+        </button>
+
+        <nav className={`nav-links${navOpen ? " open" : ""}`}>
+          <NavLink to="/" end className={({ isActive }) => (isActive ? "current" : "")}>{t("Home", "መነሻ")}</NavLink>
+          <NavLink to="/about" className={({ isActive }) => (isActive ? "current" : "")}>{t("About", "ስለ እኛ")}</NavLink>
+
+          <div className={`nav-dropdown${ddOpen ? " open" : ""}`} ref={ddRef}>
+            <Link to="/services" className={`nav-dropdown-link${isServicesArea ? " current" : ""}`}>{t("Services", "አገልግሎቶች")}</Link>
+            <button
+              className="nav-dropdown-toggle"
+              aria-label="Show services menu"
+              aria-expanded={ddOpen}
+              onClick={(e) => { e.stopPropagation(); setDdOpen((v) => !v); }}
+            >
+              <IconChevronDown width={15} height={15} />
+            </button>
+            <div className="nav-dropdown-menu">
+              <Link to="/report" className={location.pathname === "/report" ? "current" : ""}>
+                <IconFileReport width={19} height={19} />
+                <span>
+                  <span className="dd-title">{t("Report Submission", "ሪፖርት ማስገቢያ")}</span>
+                  <span className="dd-sub">{t("Submit a weekly or monthly report", "ሳምንታዊ ወይም ወርሃዊ ሪፖርት ያስገቡ")}</span>
+                </span>
+              </Link>
+              <Link to="/administrators" className={location.pathname === "/administrators" ? "current" : ""}>
+                <IconUsers width={19} height={19} />
+                <span>
+                  <span className="dd-title">{t("Administrators", "አስተዳዳሪዎች")}</span>
+                  <span className="dd-sub">{t("Find and contact the right official", "ትክክለኛውን ኃላፊ ያግኙ")}</span>
+                </span>
+              </Link>
+            </div>
+          </div>
+
+          <NavLink to="/contact" className={({ isActive }) => (isActive ? "current" : "")}>{t("Contact", "አግኙን")}</NavLink>
+
+          {user ? (
+            <span className="logged-in-pill" style={{ marginLeft: 6 }}>
+              <span className="dot" /> {user.name}
+              <button onClick={logout}>{t("Log Out", "ውጣ")}</button>
+            </span>
+          ) : (
+            <Link to="/login" className="nav-cta">
+              <IconUsers width={16} height={16} />
+              <span>{t("Log In", "ግባ")}</span>
+            </Link>
+          )}
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+function Footer() {
+  const { t } = useApp();
+  return (
+    <footer>
+      <div className="wrap">
+        <div className="footer-grid">
+          <div className="footer-brand">
+            <span className="seal"><SealFooter /></span>
+            <div>
+              <div className="am">የሀድያ ዞን ፐብሊክ ሰርቪስና የሰዉ ኃብት ልማት መምሪያ</div>
+              <div className="en">Central Ethiopia Regional State</div>
+            </div>
+          </div>
+
+          <div className="footer-col">
+            <h5>{t("Navigate", "ማውጫ")}</h5>
+            <ul>
+              <li><Link to="/">{t("Home", "መነሻ")}</Link></li>
+              <li><Link to="/about">{t("About", "ስለ እኛ")}</Link></li>
+              <li><Link to="/services">{t("Services", "አገልግሎቶች")}</Link></li>
+              <li><Link to="/contact">{t("Contact", "አግኙን")}</Link></li>
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <h5>{t("Services", "አገልግሎቶች")}</h5>
+            <ul>
+              <li><Link to="/report">{t("Report Submission", "ሪፖርት ማስገቢያ")}</Link></li>
+              <li><Link to="/administrators">{t("Leadership Directory", "የአመራር ዝርዝር")}</Link></li>
+              <li><Link to="/login">{t("Log In", "ግባ")}</Link></li>
+              <li><Link to="/contact">{t("Contact Us", "አግኙን")}</Link></li>
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <h5>{t("Reach Us", "አድራሻ")}</h5>
+            <ul>
+              <li>{t("Hosaena, Hadiya Zone, Central Ethiopia Regional State, Ethiopia", "ሆሳዕና፣ የሀድያ ዞን፣ ማዕከላዊ ኢትዮጵያ ክልላዊ መንግስት፣ ኢትዮጵያ")}</li>
+              <li>hzpsd.hr@ethiopia.gov.et</li>
+              <li>+251 46 XXX XXXX</li>
+            </ul>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <span>{t(
+            "© 2026 Hadiya Zone Public Service & Human Resource Development Department. All rights reserved.",
+            "© 2026 የሀድያ ዞን ፐብሊክ ሰርቪስና የሰዉ ኃብት ልማት መምሪያ። መብቱ በህግ የተጠበቀ ነው።"
+          )}</span>
+          <span>{t("Prototype build — connect a backend to go live", "ናሙና ገጽ — ወደ ስራ ለማስገባት ባክኤንድ ማስተሳሰር ያስፈልጋል")}</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export default function Layout() {
+  return (
+    <>
+      <Topbar />
+      <Header />
+      <Outlet />
+      <Footer />
+    </>
+  );
+}
