@@ -7,7 +7,7 @@ import { IconUpload, IconFile, IconCheck, IconLock, IconFileReport, IconShieldCh
 
 const ACCEPTED = [".pdf", ".jpg", ".jpeg", ".png"];
 
-const VITE_API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.API_URL;
 
 function humanSize(bytes) {
   if (bytes < 1024) return bytes + " B";
@@ -92,7 +92,7 @@ function ReportForm() {
     files.forEach((file) => formData.append("files", file));
 
     try {
-      const response = await fetch(`${VITE_API_URL}/api/reports`, {
+      const response = await fetch(`${API_URL}/api/reports`, {
         method: "POST",
         headers: { Authorization: `Bearer ${localStorage.getItem("authToken") || ""}` },
         body: formData,

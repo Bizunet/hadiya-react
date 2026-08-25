@@ -7,7 +7,7 @@ import {
   IconFileReport, IconUsers, IconChevronDown, IconInfo, IconSettings, IconUser,
 } from "./Icons";
 
-const VITE_API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.API_URL || "http://localhost:3000";
 
 function AnnouncementNav() {
   const { t } = useApp();
@@ -16,7 +16,7 @@ function AnnouncementNav() {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetch(`${VITE_API_URL}/api/announcements`, { signal: controller.signal })
+    fetch(`${API_URL}/api/announcements`, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error("Unable to load announcements");
         return response.json();

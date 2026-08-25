@@ -30,12 +30,12 @@ export default function Administrators() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   
-  const VITE_API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.API_URL;
 
   useEffect(() => {
     async function loadAdministrators() {
       try {
-        const response = await fetch(`${VITE_API_URL}/api/administrators`);
+        const response = await fetch(`${API_URL}/api/administrators`);
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || "Unable to load administrators");
         setAdministrators(data);
