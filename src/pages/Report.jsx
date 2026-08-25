@@ -5,18 +5,12 @@ import PageHero from "../components/PageHero";
 import { TEAMS } from "../data/teams";
 import { IconUpload, IconFile, IconCheck, IconLock, IconFileReport, IconShieldCheck } from "../components/Icons";
 
-const ACCEPTED = [".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx", ".txt"];
+const ACCEPTED = [".pdf", ".jpg", ".jpeg", ".png"];
 
 function humanSize(bytes) {
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
   return (bytes / (1024 * 1024)).toFixed(1) + " MB";
-}
-
-function refCode() {
-  const year = new Date().getFullYear();
-  const rand = Math.floor(10000 + Math.random() * 89999);
-  return `HZ-RPT-${year}-${rand}`;
 }
 
 function AuthGate() {
@@ -48,6 +42,8 @@ function ReportForm() {
   const [errors, setErrors] = useState({});
   const [dragging, setDragging] = useState(false);
   const [success, setSuccess] = useState(null);
+  const [serverError, setServerError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef = useRef(null);
 
   function setField(key, val) {
@@ -77,14 +73,37 @@ function ReportForm() {
     req.forEach((key) => {
       if (!String(fields[key]).trim()) errs[key] = true;
     });
+    if (!files.length) errs.files = true;
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
-    setSuccess(refCode());
+    setServerError("");
+    setIsSubmitting(true);
+
+    const formData = new FormData();
+    Object.entries(fields).forEach(([key, value]) => formData.append(key, value));
+    formData.append("reportType", reportType);
+    files.forEach((file) => formData.append("files", file));
+
+    try {
+      const response = await fetch("http://localhost:3000/api/reports", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${localStorage.getItem("authToken") || ""}` },
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.message || "Unable to submit report");
+      setSuccess(data.reference);
+    } catch (requestError) {
+      setServerError(requestError.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function resetForm() {
@@ -93,6 +112,7 @@ function ReportForm() {
     setFiles([]);
     setErrors({});
     setSuccess(null);
+    setServerError("");
   }
 
   if (success) {
@@ -118,6 +138,7 @@ function ReportForm() {
     <form onSubmit={handleSubmit}>
       <h3>{t("Report Details", "የሪፖርት ዝርዝር")}</h3>
       <p className="sub">{t("Fields marked with * are required.", "በ * የተመለከቱ መስኮች የግድ መሞላት አለባቸው።")}</p>
+      {serverError && <div className="err-msg" style={{ display: "block" }}>{serverError}</div>}
 
       <div className="field">
         <label>{t("Report Type *", "የሪፖርት አይነት *")}</label>
@@ -204,9 +225,10 @@ function ReportForm() {
         >
           <IconUpload width={32} height={32} />
           <div className="dz-title">{t("Click to upload or drag and drop", "ለመስቀል ይጫኑ ወይም ጎትተው ይጣሉ")}</div>
-          <div className="dz-sub">{t("PDF, JPG, PNG, DOC, DOCX or TXT — any number of files, no size limit", "PDF, JPG, PNG, DOC, DOCX ወይም TXT — ያለምንም ገደብ ብዙ ፋይሎች ማያያዝ ይቻላል")}</div>
+          <div className="dz-sub">{t("PDF or JPG/PNG images — up to 10 files, 10 MB each", "PDF ወይም JPG/PNG ምስሎች — እስከ 10 ፋይሎች፣ እያንዳንዱ እስከ 10 MB")}</div>
           <input ref={inputRef} type="file" style={{ display: "none" }} multiple accept={ACCEPTED.join(",")} onChange={(e) => addFiles(e.target.files)} />
         </div>
+        {errors.files && <div className="err-msg" style={{ display: "block" }}>{t("Please attach at least one PDF or image.", "እባክዎ ቢያንስ አንድ PDF ወይም ምስል ያያይዙ።")}</div>}
         <div className="file-list">
           {files.map((f, idx) => (
             <div className="file-chip" key={f.name + idx}>
@@ -224,9 +246,9 @@ function ReportForm() {
         <textarea value={fields.notes} onChange={(e) => setField("notes", e.target.value)} placeholder={t("Brief summary of the work covered in this report...", "ይህ ሪፖርት የሚሸፍነውን ስራ አጭር ማጠቃለያ...")} />
       </div>
 
-      <button type="submit" className="btn btn-deep btn-block">
+      <button type="submit" className="btn btn-deep btn-block" disabled={isSubmitting}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
-        <span>{t("Submit Report", "ሪፖርት ላክ")}</span>
+        <span>{isSubmitting ? t("Submitting...", "በመላክ ላይ...") : t("Submit Report", "ሪፖርት ላክ")}</span>
       </button>
     </form>
   );
