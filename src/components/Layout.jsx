@@ -4,24 +4,75 @@ import { useApp } from "../context/AppContext";
 import { SealBrand, SealFooter } from "./Seal";
 import {
   IconPhone, IconMail, IconPin, IconSun, IconMoon, IconMenu,
-  IconFileReport, IconUsers, IconChevronDown,
+  IconFileReport, IconUsers, IconChevronDown, IconInfo, IconSettings, IconUser,
 } from "./Icons";
 
-function Topbar() {
-  const { lang, setLang, theme, setTheme } = useApp();
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+function AnnouncementNav() {
+  const { t } = useApp();
+  const [announcement, setAnnouncement] = useState(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch(`${API_URL}/api/announcements`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to load announcements");
+        return response.json();
+      })
+      .then((announcements) => setAnnouncement(announcements[0] || null))
+      .catch((error) => {
+        if (error.name !== "AbortError") setAnnouncement(null);
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  const title = announcement?.title || t("Announcements", "ማስታወቂያዎች");
+  const body = announcement?.body || t("No published announcements", "የታተመ ማስታወቂያ የለም");
+
   return (
-    <div className="topbar">
-      <div className="wrap">
-        <div className="topbar-info">
-          <span><IconPhone width={14} height={14} /><span>+251 46 XXX XXXX</span></span>
-          <span><IconMail width={14} height={14} /><span>hzpsd.hr@ethiopia.gov.et</span></span>
-          <span><IconPin width={14} height={14} /><span>{lang === "am" ? "ሆሳዕና፣ የሀድያ ዞን" : "Hosaena, Hadiya Zone"}</span></span>
-        </div>
-        <div className="topbar-controls">
+    <span className="nav-announcement" title={body} role="status">
+      <IconInfo width={14} height={14} />
+      <span>{title}</span>
+    </span>
+  );
+}
+
+function HeaderControls() {
+  const { lang, setLang, theme, setTheme } = useApp();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsRef = useRef(null);
+
+  useEffect(() => {
+    function onDocumentClick(event) {
+      if (settingsRef.current && !settingsRef.current.contains(event.target)) setSettingsOpen(false);
+    }
+    document.addEventListener("click", onDocumentClick);
+    return () => document.removeEventListener("click", onDocumentClick);
+  }, []);
+
+  return (
+    <div className={`nav-settings${settingsOpen ? " open" : ""}`} ref={settingsRef}>
+      <button
+        className="settings-toggle"
+        aria-label="Open language and theme settings"
+        aria-expanded={settingsOpen}
+        onClick={() => setSettingsOpen((value) => !value)}
+      >
+        <IconSettings width={19} height={19} />
+      </button>
+      <div className="settings-menu">
+        <div className="settings-group">
+          <span className="settings-label">{lang === "am" ? "ቋንቋ" : "Language"}</span>
           <div className="lang-switch" role="group" aria-label="Language selector">
             <button className={lang === "en" ? "active" : ""} onClick={() => setLang("en")}>EN</button>
             <button className={lang === "am" ? "active" : ""} onClick={() => setLang("am")}>አማ</button>
           </div>
+        </div>
+        <div className="settings-group">
+          <span className="settings-label">{lang === "am" ? "ገጽታ" : "Theme"}</span>
           <button
             className="theme-toggle"
             aria-label="Toggle dark mode"
@@ -32,6 +83,36 @@ function Topbar() {
             <IconMoon className="ic-moon" width={16} height={16} />
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ProfileMenu({ user, logout, t }) {
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    function onDocumentClick(event) {
+      if (profileRef.current && !profileRef.current.contains(event.target)) setProfileOpen(false);
+    }
+    document.addEventListener("click", onDocumentClick);
+    return () => document.removeEventListener("click", onDocumentClick);
+  }, []);
+
+  return (
+    <div className={`profile-menu${profileOpen ? " open" : ""}`} ref={profileRef}>
+      <button
+        className="profile-toggle"
+        aria-label={t("Open profile menu", "የመገለጫ ምናሌ ክፈት")}
+        aria-expanded={profileOpen}
+        onClick={() => setProfileOpen((value) => !value)}
+      >
+        <IconUser width={19} height={19} />
+      </button>
+      <div className="profile-dropdown">
+        <span className="profile-name">{user.name}</span>
+        <button className="profile-logout" onClick={logout}>{t("Log Out", "ውጣ")}</button>
       </div>
     </div>
   );
@@ -85,6 +166,7 @@ function Header() {
         <nav className={`nav-links${navOpen ? " open" : ""}`}>
           <NavLink to="/" end className={({ isActive }) => (isActive ? "current" : "")}>{t("Home", "መነሻ")}</NavLink>
           <NavLink to="/about" className={({ isActive }) => (isActive ? "current" : "")}>{t("About", "ስለ እኛ")}</NavLink>
+          <AnnouncementNav />
 
           <div className={`nav-dropdown${ddOpen ? " open" : ""}`} ref={ddRef}>
             <Link to="/services" className={`nav-dropdown-link${isServicesArea ? " current" : ""}`}>{t("Services", "አገልግሎቶች")}</Link>
@@ -120,18 +202,18 @@ function Header() {
             <NavLink to="/admin" className={({ isActive }) => (isActive ? "current" : "")}>{t("Admin", "አስተዳዳሪ")}</NavLink>
           )}
 
+        </nav>
+        <div className="nav-account">
           {user ? (
-            <span className="logged-in-pill" style={{ marginLeft: 6 }}>
-              <span className="dot" /> {user.name}
-              <button onClick={logout}>{t("Log Out", "ውጣ")}</button>
-            </span>
+            <ProfileMenu user={user} logout={logout} t={t} />
           ) : (
             <Link to="/login" className="nav-cta">
               <IconUsers width={16} height={16} />
               <span>{t("Log In", "ግባ")}</span>
             </Link>
           )}
-        </nav>
+          <HeaderControls />
+        </div>
       </div>
     </header>
   );
@@ -174,9 +256,9 @@ function Footer() {
           <div className="footer-col">
             <h5>{t("Reach Us", "አድራሻ")}</h5>
             <ul>
-              <li>{t("Hosaena, Hadiya Zone, Central Ethiopia Regional State, Ethiopia", "ሆሳዕና፣ የሀድያ ዞን፣ ማዕከላዊ ኢትዮጵያ ክልላዊ መንግስት፣ ኢትዮጵያ")}</li>
-              <li>hzpsd.hr@ethiopia.gov.et</li>
-              <li>+251 46 XXX XXXX</li>
+              <li><span><IconPin width={14} height={14} /> {t("Hosaena, Hadiya Zone, Central Ethiopia Regional State, Ethiopia", "ሆሳዕና፣ የሀድያ ዞን፣ ማዕከላዊ ኢትዮጵያ ክልላዊ መንግስት፣ ኢትዮጵያ")}</span></li>
+              <li><span><IconMail width={14} height={14} /> hzpsd.hr@ethiopia.gov.et</span></li>
+              <li><span><IconPhone width={14} height={14} /> +251 46 XXX XXXX</span></li>
             </ul>
           </div>
         </div>
@@ -195,7 +277,6 @@ function Footer() {
 export default function Layout() {
   return (
     <>
-      <Topbar />
       <Header />
       <Outlet />
       <Footer />
