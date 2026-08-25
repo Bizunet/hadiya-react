@@ -11,6 +11,8 @@ export default function Contact() {
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+const VITE_API_URL = import.meta.env.VITE_API_URL;
+
   function setField(key, val) {
     setFields((f) => ({ ...f, [key]: val }));
   }
@@ -33,7 +35,7 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/contact", {
+      const response = await fetch(`${VITE_API_URL}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(fields),

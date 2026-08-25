@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 
-const API_URL = "http://localhost:3000";
+const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 export default function Admin() {
   const { user } = useApp();
@@ -14,8 +14,8 @@ export default function Admin() {
   useEffect(() => {
     if (user?.role !== "ADMIN") return;
     Promise.all([
-      fetch(`${API_URL}/api/administrators`).then((response) => response.json()),
-      fetch(`${API_URL}/api/announcements`).then((response) => response.json()),
+      fetch(`${VITE_API_URL}/api/administrators`).then((response) => response.json()),
+      fetch(`${VITE_API_URL}/api/announcements`).then((response) => response.json()),
     ]).then(([adminData, announcementData]) => {
       setAdministrators(adminData);
       setAnnouncements(announcementData);
@@ -25,7 +25,7 @@ export default function Admin() {
   async function updateAdministrator(administrator, event) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const response = await fetch(`${API_URL}/api/administrators/${administrator.id}`, {
+    const response = await fetch(`${VITE_API_URL}/api/administrators/${administrator.id}`, {
       method: "PUT",
       headers: { Authorization: `Bearer ${localStorage.getItem("authToken") || ""}` },
       body: formData,
@@ -35,7 +35,7 @@ export default function Admin() {
 
   async function createAnnouncement(event) {
     event.preventDefault();
-    const response = await fetch(`${API_URL}/api/announcements`, {
+    const response = await fetch(`${VITE_API_URL}/api/announcements`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
