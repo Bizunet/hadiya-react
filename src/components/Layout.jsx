@@ -7,7 +7,7 @@ import {
   IconFileReport, IconUsers, IconChevronDown, IconInfo, IconSettings, IconUser,
 } from "./Icons";
 
-const API_URL = import.meta.env.API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function AnnouncementNav() {
   const { t } = useApp();

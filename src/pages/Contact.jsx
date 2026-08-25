@@ -11,7 +11,7 @@ export default function Contact() {
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-const API_URL = import.meta.env.API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   function setField(key, val) {
     setFields((f) => ({ ...f, [key]: val }));

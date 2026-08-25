@@ -7,7 +7,7 @@ import { IconUpload, IconFile, IconCheck, IconLock, IconFileReport, IconShieldCh
 
 const ACCEPTED = [".pdf", ".jpg", ".jpeg", ".png"];
 
-const API_URL = import.meta.env.API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function humanSize(bytes) {
   if (bytes < 1024) return bytes + " B";
