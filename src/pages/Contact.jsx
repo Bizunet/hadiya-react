@@ -3,17 +3,13 @@ import { useApp } from "../context/AppContext";
 import PageHero from "../components/PageHero";
 import { IconPin, IconPhone, IconMail, IconClock, IconCheck } from "../components/Icons";
 
-function refCode() {
-  const year = new Date().getFullYear();
-  const rand = Math.floor(10000 + Math.random() * 89999);
-  return `HZ-MSG-${year}-${rand}`;
-}
-
 export default function Contact() {
   const { t } = useApp();
   const [fields, setFields] = useState({ name: "", email: "", subject: "", message: "" });
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(null);
+  const [serverError, setServerError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function setField(key, val) {
     setFields((f) => ({ ...f, [key]: val }));
@@ -29,16 +25,38 @@ export default function Contact() {
     return Object.keys(errs).length === 0;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
-    setSuccess(refCode());
+
+    setServerError("");
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("http://localhost:3000/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fields),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to send message");
+      }
+
+      setSuccess(data.reference);
+    } catch (requestError) {
+      setServerError(requestError.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function resetForm() {
     setFields({ name: "", email: "", subject: "", message: "" });
     setErrors({});
     setSuccess(null);
+    setServerError("");
   }
 
   return (
@@ -105,6 +123,7 @@ export default function Contact() {
                 <form onSubmit={handleSubmit}>
                   <h3>{t("Send a Message", "መልዕክት ይላኩ")}</h3>
                   <p className="sub">{t("We typically respond within 2 business days.", "በአብዛኛው በ2 የስራ ቀናት ውስጥ ምላሽ እንሰጣለን።")}</p>
+                  {serverError && <div className="err-msg" style={{ display: "block" }}>{serverError}</div>}
 
                   <div className="field-row">
                     <div className={`field${errors.name ? " has-error" : ""}`}>
@@ -138,9 +157,9 @@ export default function Contact() {
                     <div className="err-msg">{t("Please enter a message.", "እባክዎ መልዕክት ያስገቡ።")}</div>
                   </div>
 
-                  <button type="submit" className="btn btn-deep btn-block">
+                  <button type="submit" className="btn btn-deep btn-block" disabled={isSubmitting}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
-                    <span>{t("Send Message", "መልዕክት ላክ")}</span>
+                    <span>{isSubmitting ? t("Sending...", "በመላክ ላይ...") : t("Send Message", "መልዕክት ላክ")}</span>
                   </button>
                 </form>
               )}
