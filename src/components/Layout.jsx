@@ -4,7 +4,7 @@ import { useApp } from "../context/AppContext";
 import { SealBrand, SealFooter } from "./Seal";
 import {
   IconPhone, IconMail, IconPin, IconSun, IconMoon, IconMenu,
-  IconFileReport, IconUsers, IconChevronDown, IconInfo, IconSettings, IconUser,
+  IconFileReport, IconUsers, IconChevronDown, IconSettings, IconUser,
 } from "./Icons";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -33,10 +33,9 @@ function AnnouncementNav() {
   const body = announcement?.body || t("No published announcements", "የታተመ ማስታወቂያ የለም");
 
   return (
-    <span className="nav-announcement" title={body} role="status">
-      <IconInfo width={14} height={14} />
+    <Link className="nav-announcement" title={body} to="/announcements">
       <span>{title}</span>
-    </span>
+    </Link>
   );
 }
 

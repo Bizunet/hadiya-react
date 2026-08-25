@@ -7,6 +7,7 @@ import Services from "./pages/Services";
 import Report from "./pages/Report";
 import Administrators from "./pages/Administrators";
 import Contact from "./pages/Contact";
+import Announcements from "./pages/Announcements";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Admin from "./pages/Admin";
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/report" element={<Report />} />
             <Route path="/administrators" element={<Administrators />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/announcements" element={<Announcements />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/admin" element={<Admin />} />

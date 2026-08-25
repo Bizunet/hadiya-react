@@ -439,6 +439,19 @@ section{ padding:76px 0; }
 .announce-date .m{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); margin-top:2px; }
 .announce-item h4{ font-size:15.5px; font-weight:700; color:var(--ink); }
 .announce-item p{ font-size:13.5px; color:var(--ink-soft); margin-top:4px; }
+.announcements-shell{ max-width:900px; }
+.announcements-page-list{ margin-top:8px; }
+.announcement-copy{ flex:1; min-width:0; }
+.announcement-copy h4{ font-size:19px; color:var(--heading); }
+.announcement-copy > p:last-child{ font-size:14.5px; line-height:1.7; margin-top:10px; white-space:pre-line; }
+.announcement-meta{ color:var(--ink-faint) !important; font-size:12px !important; margin-top:3px !important; }
+.announcements-state{ padding:48px 30px; text-align:center; }
+.announcements-state > svg{ color:var(--gold); margin:0 auto 14px; }
+.announcements-state h3{ font-size:20px; }
+.announcements-state .sub{ color:var(--ink-soft); margin-top:7px; }
+.announcements-error{ align-items:center; flex-wrap:wrap; }
+.announcements-error > span{ flex:1; min-width:220px; }
+.announcements-error .btn{ padding:9px 14px; font-size:13px; }
 
 /* cta band */
 .cta-band{
@@ -690,6 +703,9 @@ footer{ background:var(--deep-dark); color:#A9C3DA; padding:60px 0 26px; margin-
   .stat-row{ grid-template-columns:1fr 1fr; }
   .leader-row{ flex-direction:column; align-items:flex-start; }
   .avatar-ph.lg{ width:140px; height:174px; }
+  .announce-item{ padding:18px 16px; gap:12px; }
+  .announce-date{ width:52px; }
+  .announcement-copy h4{ font-size:16px; }
 }
 
 /* ============================================================
