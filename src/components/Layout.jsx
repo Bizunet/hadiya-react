@@ -116,6 +116,10 @@ function Header() {
 
           <NavLink to="/contact" className={({ isActive }) => (isActive ? "current" : "")}>{t("Contact", "አግኙን")}</NavLink>
 
+          {user?.role === "ADMIN" && (
+            <NavLink to="/admin" className={({ isActive }) => (isActive ? "current" : "")}>{t("Admin", "አስተዳዳሪ")}</NavLink>
+          )}
+
           {user ? (
             <span className="logged-in-pill" style={{ marginLeft: 6 }}>
               <span className="dot" /> {user.name}
