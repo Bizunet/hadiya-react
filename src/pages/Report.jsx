@@ -5,7 +5,7 @@ import PageHero from "../components/PageHero";
 import { TEAMS } from "../data/teams";
 import { IconUpload, IconFile, IconCheck, IconLock, IconFileReport, IconShieldCheck } from "../components/Icons";
 
-const ACCEPTED = [".pdf", ".jpg", ".jpeg", ".png"];
+const ACCEPTED = [".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx"];
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
