@@ -77,13 +77,7 @@ export default function Signup() {
             </div>
           ) : (
             <div className="card">
-              <div className="notice" style={{ marginBottom: 24 }}>
-                <IconInfo width={19} height={19} />
-                <span>{t(
-                  "This is a prototype signup form. The data is stored only in the browser session and does not connect to a real database yet.",
-                  "ይህ የናሙና መመዝገብ ቅጽ ነው። መረጃዎች በአሳሽ ክፍል ብቻ ይቀመጣሉ እና እስካሁን እውነተኛ የውሂብ ጎታ አይገናኝም።"
-                )}</span>
-              </div>
+              
 
               <form onSubmit={handleSubmit}>
                 <h3>{t("Create an employee account", "የሰራተኛ መለያ ይፍጠሩ")}</h3>

@@ -48,13 +48,7 @@ export default function Login() {
             </div>
           ) : (
             <div className="card">
-              <div className="notice" style={{ marginBottom: 24 }}>
-                <IconInfo width={19} height={19} />
-                <span>{t(
-                  "This is a demo login for the prototype — it does not check a real password yet. Connect a backend (e.g. Supabase Auth) to enable real employee sign-in.",
-                  "ይህ ለናሙናው የተዘጋጀ መግቢያ ነው — እውነተኛ የይለፍ ቃል ገና አያረጋግጥም። እውነተኛ የሰራተኛ መግቢያ ለማንቃት ባክኤንድ (ለምሳሌ Supabase Auth) ማስተሳሰር ያስፈልጋል።"
-                )}</span>
-              </div>
+              
 
               <form onSubmit={handleSubmit}>
                 <h3>{t("Employee Sign In", "የሰራተኛ መግቢያ")}</h3>
