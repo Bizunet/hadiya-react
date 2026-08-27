@@ -7,34 +7,12 @@ import {
   IconFileReport, IconUsers, IconChevronDown, IconSettings, IconUser,
 } from "./Icons";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
 function AnnouncementNav() {
   const { t } = useApp();
-  const [announcement, setAnnouncement] = useState(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    fetch(`${API_URL}/api/announcements`, { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) throw new Error("Unable to load announcements");
-        return response.json();
-      })
-      .then((announcements) => setAnnouncement(announcements[0] || null))
-      .catch((error) => {
-        if (error.name !== "AbortError") setAnnouncement(null);
-      });
-
-    return () => controller.abort();
-  }, []);
-
-  const title = announcement?.title || t("Announcements", "ማስታወቂያዎች");
-  const body = announcement?.body || t("No published announcements", "የታተመ ማስታወቂያ የለም");
 
   return (
-    <Link className="nav-announcement" title={body} to="/announcements">
-      <span>{title}</span>
+    <Link className="nav-announcement" to="/announcements">
+      <span>{t("Announcements", "ማስታወቂያዎች")}</span>
     </Link>
   );
 }

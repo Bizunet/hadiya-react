@@ -17,6 +17,7 @@ function formatDate(value, language) {
 export default function Announcements() {
   const { t, lang } = useApp();
   const [announcements, setAnnouncements] = useState([]);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -87,17 +88,29 @@ export default function Announcements() {
                     <div className="d">{new Date(announcement.createdAt).getDate()}</div>
                     <div className="m">{new Intl.DateTimeFormat(lang === "am" ? "am-ET" : "en-US", { month: "short" }).format(new Date(announcement.createdAt))}</div>
                   </div>
-                  <div className="announcement-copy">
+                  <button className="announcement-copy announcement-trigger" type="button" onClick={() => setSelectedAnnouncement(announcement)}>
                     <h4>{announcement.title}</h4>
                     <p className="announcement-meta">{formatDate(announcement.createdAt, lang)}</p>
                     <p>{announcement.body}</p>
-                  </div>
+                  </button>
                 </Reveal>
               ))}
             </div>
           )}
         </div>
       </section>
+
+      {selectedAnnouncement && (
+        <div className="modal-backdrop" role="presentation" onClick={() => setSelectedAnnouncement(null)}>
+          <div className="modal" role="dialog" aria-modal="true" aria-labelledby="announcement-dialog-title" onClick={(event) => event.stopPropagation()}>
+            <button className="modal-close" type="button" aria-label={t("Close announcement", "ማስታወቂያውን ዝጋ")} onClick={() => setSelectedAnnouncement(null)}>x</button>
+            <span className="eyebrow">{t("Department Announcement", "የመምሪያ ማስታወቂያ")}</span>
+            <h2 id="announcement-dialog-title">{selectedAnnouncement.title}</h2>
+            <p className="announcement-meta">{formatDate(selectedAnnouncement.createdAt, lang)}</p>
+            <p className="modal-copy">{selectedAnnouncement.body}</p>
+          </div>
+        </div>
+      )}
     </>
   );
 }
