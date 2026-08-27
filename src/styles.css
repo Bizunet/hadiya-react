@@ -530,6 +530,10 @@ section{ padding:76px 0; }
   font-family:inherit; font-size:14.5px; background:var(--paper); color:var(--ink);
   transition:border-color .16s ease, box-shadow .16s ease;
 }
+.password-input{ position:relative; }
+.password-input input{ padding-right:46px; }
+.password-toggle{ position:absolute; top:50%; right:8px; display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; transform:translateY(-50%); border:0; border-radius:50%; background:transparent; color:var(--ink-faint); }
+.password-toggle:hover{ color:var(--accent); background:var(--paper-dim); }
 .field textarea{ resize:vertical; min-height:96px; }
 .field input:focus, .field select:focus, .field textarea:focus{
   outline:none; border-color:var(--deep); box-shadow:0 0 0 3px rgba(11,42,74,.12); background:#fff;

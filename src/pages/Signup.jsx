@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import PageHero from "../components/PageHero";
-import { IconLock, IconCheck, IconInfo } from "../components/Icons";
+import { IconLock, IconCheck, IconEye, IconEyeOff } from "../components/Icons";
 
 export default function Signup() {
   const { t, user, register } = useApp();
@@ -12,8 +12,11 @@ export default function Signup() {
     email: "",
     employeeId: "",
     password: "",
+    confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   function updateField(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -26,6 +29,8 @@ export default function Signup() {
     if (!form.email.trim()) nextErrors.email = t("Please enter your email.", "ኢሜልዎን ያስገቡ።");
     if (!form.employeeId.trim()) nextErrors.employeeId = t("Please enter your employee ID.", "የሰራተኛ መለያ ቁጥርዎን ያስገቡ።");
     if (!form.password.trim()) nextErrors.password = t("Please create a password.", "የይለፍ ቃል ይፍጠሩ።");
+    if (!form.confirmPassword.trim()) nextErrors.confirmPassword = t("Please confirm your password.", "እባክዎ የይለፍ ቃልዎን ያረጋግጡ።");
+    else if (form.password !== form.confirmPassword) nextErrors.confirmPassword = t("Passwords do not match.", "የይለፍ ቃሎች አይመሳሰሉም።");
     return nextErrors;
   }
 
@@ -122,15 +127,37 @@ export default function Signup() {
 
                 <div className={`field${errors.password ? " has-error" : ""}`}>
                   <label>{t("Password *", "የይለፍ ቃል *")}</label>
-                  <input
-                    type="password"
-                    className={errors.password ? "invalid" : ""}
-                    value={form.password}
-                    onChange={(e) => updateField("password", e.target.value)}
-                    placeholder="••••••••"
-                  />
+                  <div className="password-input">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className={errors.password ? "invalid" : ""}
+                      value={form.password}
+                      onChange={(e) => updateField("password", e.target.value)}
+                      placeholder="••••••••"
+                    />
+                    <button className="password-toggle" type="button" aria-label={showPassword ? t("Hide password", "የይለፍ ቃል ደብቅ") : t("Show password", "የይለፍ ቃል አሳይ")} onClick={() => setShowPassword((value) => !value)}>
+                      {showPassword ? <IconEyeOff width={18} height={18} /> : <IconEye width={18} height={18} />}
+                    </button>
+                  </div>
                   <div className="err-msg" style={{ display: errors.password ? "block" : "none" }}>{errors.password}</div>
                   <div className="hint">{t("Use any password for the prototype demo.", "ለናሙና ምሳሌ ማንኛውንም የይለፍ ቃል መጠቀም ይችላሉ።")}</div>
+                </div>
+
+                <div className={`field${errors.confirmPassword ? " has-error" : ""}`}>
+                  <label>{t("Confirm Password *", "የይለፍ ቃል ያረጋግጡ *")}</label>
+                  <div className="password-input">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      className={errors.confirmPassword ? "invalid" : ""}
+                      value={form.confirmPassword}
+                      onChange={(e) => updateField("confirmPassword", e.target.value)}
+                      placeholder="••••••••"
+                    />
+                    <button className="password-toggle" type="button" aria-label={showConfirmPassword ? t("Hide confirmed password", "የተረጋገጠውን የይለፍ ቃል ደብቅ") : t("Show confirmed password", "የተረጋገጠውን የይለፍ ቃል አሳይ")} onClick={() => setShowConfirmPassword((value) => !value)}>
+                      {showConfirmPassword ? <IconEyeOff width={18} height={18} /> : <IconEye width={18} height={18} />}
+                    </button>
+                  </div>
+                  <div className="err-msg" style={{ display: errors.confirmPassword ? "block" : "none" }}>{errors.confirmPassword}</div>
                 </div>
 
                 <button type="submit" className="btn btn-deep btn-block">

@@ -66,6 +66,9 @@ export const IconTarget = (p) => (
 export const IconEye = (p) => (
   <svg viewBox="0 0 24 24" {...base} {...p}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
 );
+export const IconEyeOff = (p) => (
+  <svg viewBox="0 0 24 24" {...base} {...p}><path d="M3 3l18 18" /><path d="M10.58 10.58a2 2 0 0 0 2.83 2.83" /><path d="M9.88 5.09A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-3.16 4.19" /><path d="M6.61 6.61C3.77 8.35 1 12 1 12s4 8 11 8a10.94 10.94 0 0 0 4.12-.8" /></svg>
+);
 export const IconStar = (p) => (
   <svg viewBox="0 0 24 24" {...base} {...p}><path d="M12 2 L14.5 8.5 L21 9 L16 13.5 L17.5 20 L12 16.5 L6.5 20 L8 13.5 L3 9 L9.5 8.5 Z" /></svg>
 );
