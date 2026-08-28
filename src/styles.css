@@ -507,6 +507,27 @@ section{ padding:76px 0; }
 .stat-cell{ background:var(--card); padding:22px; text-align:center; }
 .stat-cell .n{ font-family:var(--font-display); font-size:30px; color:var(--gold); font-weight:700; }
 .stat-cell .l{ font-size:12px; color:var(--ink-faint); margin-top:4px; }
+.admin-stats-panel{ padding:28px; }
+.admin-stat-row{ grid-template-columns:repeat(5,1fr); margin-top:18px; }
+.admin-breakdowns{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:28px; }
+.admin-breakdowns h4, .admin-recent h4{ font-size:16px; margin-bottom:10px; }
+.admin-list-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:10px 0; border-bottom:1px solid var(--line-soft); color:var(--ink-soft); font-size:13px; }
+.admin-list-row strong{ color:var(--ink); }
+.admin-list-row small{ color:var(--ink-faint); margin-left:8px; }
+.admin-list-row time{ color:var(--ink-faint); white-space:nowrap; font-size:12px; }
+.admin-recent{ margin-top:28px; }
+.admin-error{ align-items:center; justify-content:space-between; }
+.admin-section-title{ display:flex; justify-content:space-between; margin-bottom:22px; }
+.admin-section-title h3{ margin-top:5px; }
+.checkbox-field{ display:flex; align-items:center; gap:8px; margin:4px 0 18px; color:var(--ink-soft); font-size:13px; font-weight:600; }
+.checkbox-field input{ accent-color:var(--deep); }
+.admin-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+.slide-admin-list{ display:grid; gap:12px; margin-top:28px; }
+.slide-admin-item{ display:flex; align-items:center; gap:14px; padding:12px; border:1px solid var(--line); border-radius:var(--radius-md); }
+.slide-admin-item img{ width:120px; height:68px; object-fit:cover; border-radius:var(--radius-sm); background:var(--paper-dim); }
+.slide-admin-copy{ flex:1; min-width:0; display:grid; gap:4px; }
+.slide-admin-copy strong{ overflow-wrap:anywhere; color:var(--ink); }
+.slide-admin-copy span{ color:var(--ink-faint); font-size:12px; }
 
 /* ---------------------------------------------------------- forms */
 .form-shell{ display:grid; grid-template-columns:1.5fr 1fr; gap:36px; align-items:start; }

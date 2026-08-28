@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import HeroSlideshow from "../components/HeroSlideshow";
@@ -29,7 +30,24 @@ export default function Home() {
   const { t } = useApp();
   const [statsRef, statsVisible] = useReveal();
   const depts = useCounter("8+", statsVisible);
-  const employees = useCounter("41,000+", statsVisible);
+  const [publicStats, setPublicStats] = useState({ totalEmployees: "41,000+", totalReports: "0" });
+  const employees = useCounter(publicStats.totalEmployees, statsVisible);
+  const reports = useCounter(publicStats.totalReports, statsVisible);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/stats/public`)
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to load public statistics");
+        return response.json();
+      })
+      .then((data) => {
+        setPublicStats({
+          totalEmployees: Number.isFinite(Number(data.totalEmployees)) ? String(data.totalEmployees) : "41,000+",
+          totalReports: Number.isFinite(Number(data.totalReports)) ? String(data.totalReports) : "0",
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <>
@@ -86,6 +104,7 @@ export default function Home() {
           <div className="stat-row" data-stagger>
             <div className="stat-cell reveal-scale in-view"><div className="n">{depts}</div><div className="l">{t("Active Departments", "ንቁ ክፍሎች")}</div></div>
             <div className="stat-cell reveal-scale in-view"><div className="n">{employees}</div><div className="l">{t("Employees", "ሰራተኞች")}</div></div>
+            <div className="stat-cell reveal-scale in-view"><div className="n">{reports}</div><div className="l">{t("Reports Submitted", "የቀረቡ ሪፖርቶች")}</div></div>
             <div className="stat-cell reveal-scale in-view"><div className="n">10</div><div className="l">{t("Specialist Teams", "የስራ ቡድኖች")}</div></div>
             <div className="stat-cell reveal-scale in-view"><div className="n">2026</div><div className="l">{t("Portal Established", "ፖርታል የተመሰረተበት")}</div></div>
           </div>
