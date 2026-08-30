@@ -7,12 +7,15 @@ import {
   IconFileReport, IconUsers, IconChevronDown, IconSettings, IconUser,
 } from "./Icons";
 
-function AnnouncementNav() {
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+function AnnouncementNav({ count = 0 }) {
   const { t } = useApp();
 
   return (
     <Link className="nav-announcement" to="/announcements">
       <span>{t("Announcements", "ማስታወቂያዎች")}</span>
+      {count > 0 && <span className="nav-item-badge">{count}</span>}
     </Link>
   );
 }
@@ -101,6 +104,7 @@ function Header() {
   const [navOpen, setNavOpen] = useState(false);
   const [ddOpen, setDdOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [announcementCount, setAnnouncementCount] = useState(0);
   const ddRef = useRef(null);
 
   useEffect(() => {
@@ -108,6 +112,21 @@ function Header() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    async function loadAnnouncementCount() {
+      try {
+        const response = await fetch(`${API_URL}/api/announcements`);
+        if (!response.ok) return;
+        const data = await response.json();
+        setAnnouncementCount(Array.isArray(data) ? data.length : 0);
+      } catch {
+        setAnnouncementCount(0);
+      }
+    }
+
+    loadAnnouncementCount();
   }, []);
 
   useEffect(() => {
@@ -124,6 +143,7 @@ function Header() {
   }, []);
 
   const isServicesArea = ["/services", "/report", "/administrators"].includes(location.pathname);
+  const closeNav = () => setNavOpen(false);
 
   return (
     <header className={`site-header${scrolled ? " scrolled" : ""}`}>
@@ -140,13 +160,33 @@ function Header() {
           <IconMenu width={26} height={26} />
         </button>
 
-        <nav className={`nav-links${navOpen ? " open" : ""}`}>
-          <NavLink to="/" end className={({ isActive }) => (isActive ? "current" : "")}>{t("Home", "መነሻ")}</NavLink>
-          <NavLink to="/about" className={({ isActive }) => (isActive ? "current" : "")}>{t("About", "ስለ እኛ")}</NavLink>
-          <AnnouncementNav />
+        {navOpen && <button type="button" className="mobile-nav-backdrop" aria-label="Close navigation" onClick={closeNav} />}
+
+        <nav className={`nav-links${navOpen ? " open" : ""}`} aria-label="Main navigation">
+          <div className="mobile-nav-header">
+            <span className="mobile-nav-title">Menu</span>
+            <button type="button" className="mobile-nav-close" aria-label="Close menu" onClick={closeNav}>×</button>
+          </div>
+
+          <NavLink to="/" end className={({ isActive }) => (isActive ? "current" : "")} onClick={closeNav}>
+            <span className="nav-item-icon" aria-hidden="true">⌂</span>
+            <span className="nav-item-label">{t("Home", "መነሻ")}</span>
+          </NavLink>
+          <NavLink to="/about" className={({ isActive }) => (isActive ? "current" : "")} onClick={closeNav}>
+            <span className="nav-item-icon" aria-hidden="true">ℹ</span>
+            <span className="nav-item-label">{t("About", "ስለ እኛ")}</span>
+          </NavLink>
+          <NavLink to="/announcements" className={({ isActive }) => (isActive ? "current" : "")} onClick={closeNav}>
+            <span className="nav-item-icon" aria-hidden="true">📣</span>
+            <span className="nav-item-label">{t("Announcements", "ማስታወቂያዎች")}</span>
+            {announcementCount > 0 && <span className="nav-item-badge">{announcementCount}</span>}
+          </NavLink>
 
           <div className={`nav-dropdown${ddOpen ? " open" : ""}`} ref={ddRef}>
-            <Link to="/services" className={`nav-dropdown-link${isServicesArea ? " current" : ""}`}>{t("Services", "አገልግሎቶች")}</Link>
+            <Link to="/services" className={`nav-dropdown-link${isServicesArea ? " current" : ""}`} onClick={closeNav}>
+              <span className="nav-item-icon" aria-hidden="true">▣</span>
+              <span className="nav-item-label">{t("Services", "አገልግሎቶች")}</span>
+            </Link>
             <button
               className="nav-dropdown-toggle"
               aria-label="Show services menu"
@@ -156,14 +196,14 @@ function Header() {
               <IconChevronDown width={15} height={15} />
             </button>
             <div className="nav-dropdown-menu">
-              <Link to="/report" className={location.pathname === "/report" ? "current" : ""}>
+              <Link to="/report" className={location.pathname === "/report" ? "current" : ""} onClick={closeNav}>
                 <IconFileReport width={19} height={19} />
                 <span>
                   <span className="dd-title">{t("Report Submission", "ሪፖርት ማስገቢያ")}</span>
                   <span className="dd-sub">{t("Submit a weekly or monthly report", "ሳምንታዊ ወይም ወርሃዊ ሪፖርት ያስገቡ")}</span>
                 </span>
               </Link>
-              <Link to="/administrators" className={location.pathname === "/administrators" ? "current" : ""}>
+              <Link to="/administrators" className={location.pathname === "/administrators" ? "current" : ""} onClick={closeNav}>
                 <IconUsers width={19} height={19} />
                 <span>
                   <span className="dd-title">{t("Administrators", "አስተዳዳሪዎች")}</span>
@@ -173,17 +213,23 @@ function Header() {
             </div>
           </div>
 
-          <NavLink to="/contact" className={({ isActive }) => (isActive ? "current" : "")}>{t("Contact", "አግኙን")}</NavLink>
+          <NavLink to="/contact" className={({ isActive }) => (isActive ? "current" : "")} onClick={closeNav}>
+            <span className="nav-item-icon" aria-hidden="true">✉</span>
+            <span className="nav-item-label">{t("Contact", "አግኙን")}</span>
+          </NavLink>
 
           {user?.role === "ADMIN" && (
-            <NavLink to="/admin" className={({ isActive }) => (isActive ? "current" : "")}>{t("Admin", "አስተዳዳሪ")}</NavLink>
+            <NavLink to="/admin" className={({ isActive }) => (isActive ? "current" : "")} onClick={closeNav}>
+              <span className="nav-item-icon" aria-hidden="true">⚙</span>
+              <span className="nav-item-label">{t("Admin", "አስተዳዳሪ")}</span>
+            </NavLink>
           )}
 
           <div className="mobile-nav-actions">
             {user ? (
               <ProfileMenu user={user} logout={logout} t={t} />
             ) : (
-              <Link to="/login" className="nav-cta">
+              <Link to="/login" className="nav-cta" onClick={closeNav}>
                 <IconUsers width={16} height={16} />
                 <span>{t("Log In", "ግባ")}</span>
               </Link>
