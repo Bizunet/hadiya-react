@@ -282,6 +282,7 @@ html[data-theme="dark"] .theme-toggle .ic-moon{ opacity:0; transform:rotate(90de
     border:1px solid rgba(255,255,255,.08);
     border-right:none;
     overflow-y:auto;
+    overflow-x:visible;
     box-shadow:-16px 0 30px rgba(0,0,0,.28);
     z-index:200;
   }
@@ -310,13 +311,41 @@ html[data-theme="dark"] .theme-toggle .ic-moon{ opacity:0; transform:rotate(90de
   .mobile-nav-actions{
     display:flex;
     align-items:center;
-    justify-content:flex-end;
+    justify-content:space-between;
     gap:12px;
+    width:100%;
+    flex-wrap:wrap;
     padding-top:12px;
     border-top:1px solid rgba(255,255,255,.08);
     margin-top:8px;
   }
   .mobile-nav-actions .nav-cta{ margin-top:0; }
+  .nav-settings{
+    position:static;
+    width:100%;
+    margin-top:4px;
+  }
+  .settings-menu{
+    position:static;
+    width:100%;
+    margin-top:8px;
+    padding:12px;
+    transform:none;
+    border-radius:12px;
+    box-shadow:none;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+  }
+  .nav-settings.open .settings-menu{
+    opacity:1;
+    visibility:visible;
+    transform:none;
+  }
+  .settings-toggle{
+    width:42px;
+    height:42px;
+    margin-left:auto;
+  }
   .nav-toggle{
     display:inline-flex;
     position:relative;
