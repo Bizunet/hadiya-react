@@ -268,9 +268,9 @@ html[data-theme="dark"] .theme-toggle .ic-moon{ opacity:0; transform:rotate(90de
   .nav-links{
     position:fixed; top:0; right:0; bottom:0; left:auto;
     width:min(80vw, 340px); height:100vh; min-height:100vh;
-    display:flex !important; flex-direction:column; align-items:stretch;
+    display:flex !important; flex-direction:column; align-items:stretch; justify-content:flex-start;
     background:rgba(13, 22, 35, 0.98); color:#fff;
-    padding:14px 12px 16px; gap:6px;
+    padding:10px 12px 16px; gap:0;
     opacity:0; visibility:hidden; pointer-events:none;
     transform:translateX(105%);
     transition:transform .28s ease, opacity .22s ease, visibility .22s ease;
@@ -285,8 +285,15 @@ html[data-theme="dark"] .theme-toggle .ic-moon{ opacity:0; transform:rotate(90de
 
   .mobile-nav-header{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:2px 4px 10px; margin-top:0; border-bottom:1px solid rgba(255,255,255,.08);
+    padding:4px 4px 8px; margin:0; border-bottom:1px solid rgba(255,255,255,.08);
+    flex-shrink:0;
   }
+
+  .mobile-nav-scroll{
+    flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px;
+    padding:8px 0 0; margin:0;
+  }
+
   .mobile-nav-title{ font-size:13px; text-transform:uppercase; letter-spacing:.12em; color:#d8e5f7; font-weight:700; }
   .mobile-nav-close{
     width:36px; height:36px; border-radius:50%; border:1px solid rgba(255,255,255,.12);
