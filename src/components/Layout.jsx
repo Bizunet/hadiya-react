@@ -179,6 +179,17 @@ function Header() {
             <NavLink to="/admin" className={({ isActive }) => (isActive ? "current" : "")}>{t("Admin", "አስተዳዳሪ")}</NavLink>
           )}
 
+          <div className="mobile-nav-actions">
+            {user ? (
+              <ProfileMenu user={user} logout={logout} t={t} />
+            ) : (
+              <Link to="/login" className="nav-cta">
+                <IconUsers width={16} height={16} />
+                <span>{t("Log In", "ግባ")}</span>
+              </Link>
+            )}
+            <HeaderControls />
+          </div>
         </nav>
         <div className="nav-account">
           {user ? (
