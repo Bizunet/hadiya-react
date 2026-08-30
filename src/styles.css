@@ -257,7 +257,8 @@ html[data-theme="dark"] .theme-toggle .ic-moon{ opacity:0; transform:rotate(90de
 
 /* mobile */
 @media (max-width: 900px){
-  .nav{ display:flex; }
+  .nav{ display:flex; align-items:center; gap:10px; }
+  .brand{ max-width:calc(100% - 110px); }
   .nav-links{
     position:fixed; top:84px; right:0; bottom:0; left:0; background:var(--paper); flex-direction:column;
     align-items:stretch; padding:12px 20px 30px; gap:2px; transform:translateY(-8px);
@@ -268,8 +269,18 @@ html[data-theme="dark"] .theme-toggle .ic-moon{ opacity:0; transform:rotate(90de
   .nav-links a{ padding:14px 10px; font-size:16px; border-bottom:1px solid var(--line-soft); border-radius:0; }
   .nav-links .nav-announcement{ max-width:none; justify-content:flex-start; padding:14px 10px; border-left:0; border-bottom:1px solid var(--line-soft); border-radius:0; font-size:16px; }
   .nav-cta{ margin-top:10px; justify-content:center; }
-  .nav-toggle{ display:inline-flex; }
-  .nav-account{ margin-left:auto; }
+  .nav-toggle{
+    display:inline-flex;
+    position:relative;
+    z-index:12;
+    flex-shrink:0;
+    margin-left:auto;
+  }
+  .nav-account{
+    margin-left:0;
+    position:relative;
+    z-index:2;
+  }
 }
 @media (min-width: 901px) and (max-width: 1180px){
   .nav{ gap:8px; }
