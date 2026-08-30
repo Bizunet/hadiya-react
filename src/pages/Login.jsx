@@ -14,7 +14,7 @@ export default function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!id.trim() || !password.trim()) {
+    if (!id.trim() || password.length < 6) {
       setError(true);
       return;
     }
@@ -61,9 +61,18 @@ export default function Login() {
                   <div className="err-msg" style={{ display: error && !id.trim() ? "block" : "none" }}>{t("Please enter your employee ID.", "እባክዎ የሰራተኛ መለያ ቁጥርዎን ያስገቡ።")}</div>
                 </div>
 
-                <div className="field">
+                <div className={`field${error && password.length < 6 ? " has-error" : ""}`}>
                   <label>{t("Password *", "የይለፍ ቃል *")}</label>
-                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+                  <input
+                    type="password"
+                    className={error && password.length < 6 ? "invalid" : ""}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                  <div className="err-msg" style={{ display: error && password.length < 6 ? "block" : "none" }}>
+                    {t("Password must be at least 6 characters long.", "የይለፍ ቃል ቢያንስ 6 ፊደላት መሆን አለበት።")}
+                  </div>
                 </div>
 
                 <button type="submit" className="btn btn-deep btn-block">

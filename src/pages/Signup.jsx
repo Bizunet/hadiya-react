@@ -29,6 +29,7 @@ export default function Signup() {
     if (!form.email.trim()) nextErrors.email = t("Please enter your email.", "ኢሜልዎን ያስገቡ።");
     if (!form.employeeId.trim()) nextErrors.employeeId = t("Please enter your employee ID.", "የሰራተኛ መለያ ቁጥርዎን ያስገቡ።");
     if (!form.password.trim()) nextErrors.password = t("Please create a password.", "የይለፍ ቃል ይፍጠሩ።");
+    else if (form.password.length < 6) nextErrors.password = t("Password must be at least 6 characters long.", "የይለፍ ቃል ቢያንስ 6 ፊደላት መሆን አለበት።");
     if (!form.confirmPassword.trim()) nextErrors.confirmPassword = t("Please confirm your password.", "እባክዎ የይለፍ ቃልዎን ያረጋግጡ።");
     else if (form.password !== form.confirmPassword) nextErrors.confirmPassword = t("Passwords do not match.", "የይለፍ ቃሎች አይመሳሰሉም።");
     return nextErrors;
