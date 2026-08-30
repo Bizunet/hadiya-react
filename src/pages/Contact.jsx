@@ -76,37 +76,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
       <section>
         <div className="wrap">
           <div className="contact-grid">
-            <div>
-              <div className="contact-info-list">
-                <div className="contact-info-item">
-                  <span className="ic"><IconPin width={20} height={20} /></span>
-                  <div>
-                    <h4>{t("Office Address", "የጽ/ቤት አድራሻ")}</h4>
-                    <p>{t(
-                      "Hadiya Zone Public Service & HR Development Department, Hosaena, Central Ethiopia Regional State, Ethiopia",
-                      "የሀድያ ዞን ፐብሊክ ሰርቪስና የሰዉ ኃብት ልማት መምሪያ፣ ሆሳዕና፣ ማዕከላዊ ኢትዮጵያ ክልላዊ መንግስት፣ ኢትዮጵያ"
-                    )}</p>
-                  </div>
-                </div>
-                <div className="contact-info-item">
-                  <span className="ic"><IconPhone width={20} height={20} /></span>
-                  <div><h4>{t("Phone", "ስልክ")}</h4><p>+251 46 XXX XXXX</p></div>
-                </div>
-                <div className="contact-info-item">
-                  <span className="ic"><IconMail width={20} height={20} /></span>
-                  <div><h4>{t("Email", "ኢሜይል")}</h4><p>hzpsd.hr@ethiopia.gov.et</p></div>
-                </div>
-                <div className="contact-info-item">
-                  <span className="ic"><IconClock width={20} height={20} /></span>
-                  <div><h4>{t("Office Hours", "የስራ ሰዓት")}</h4><p>{t("Monday – Friday, 8:30 AM – 5:00 PM", "ሰኞ - አርብ፣ 8:30 ጠዋት - 5:00 ከሰዓት")}</p></div>
-                </div>
-              </div>
-
-              <div className="map-ph">
-                <IconPin width={30} height={30} />
-                <span>{t("Map — Hosaena, Hadiya Zone, Ethiopia", "ካርታ — ሆሳዕና፣ የሀድያ ዞን፣ ኢትዮጵያ")}</span>
-              </div>
-            </div>
+           
 
             <div className="card form-card">
               {success ? (
