@@ -135,6 +135,11 @@ function Header() {
   }, [location.pathname]);
 
   useEffect(() => {
+    document.body.style.overflow = navOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [navOpen]);
+
+  useEffect(() => {
     function onDocClick(e) {
       if (ddRef.current && !ddRef.current.contains(e.target)) setDdOpen(false);
     }
