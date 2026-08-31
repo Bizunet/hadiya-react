@@ -74,35 +74,59 @@ export default function Admin() {
 
   async function downloadReportFile(file) {
     try {
+      setManagementError("");
       const response = await fetch(`${API_URL}/api/reports/admin/files/${file.id}/download`, { headers: authHeaders });
 
       const contentType = response.headers.get("content-type") || "";
       const disposition = response.headers.get("content-disposition") || "";
 
-      if (response.ok && (contentType.startsWith("application/") || disposition.includes("attachment"))) {
+      if (response.ok) {
+        if (contentType.includes("application/json")) {
+          const data = await response.json();
+          if (data.url) {
+            try {
+              const fileRes = await fetch(data.url);
+              if (fileRes.ok) {
+                const blob = await fileRes.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = blobUrl;
+                link.download = data.name || file.originalName || "report-file";
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(blobUrl);
+                return;
+              }
+            } catch {
+              window.open(data.url, "_blank", "noopener,noreferrer");
+              return;
+            }
+            window.open(data.url, "_blank", "noopener,noreferrer");
+            return;
+          }
+          setManagementError(data.message || "Unable to download file");
+          return;
+        }
+
         const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
+        const blobUrl = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         const fileName = (() => {
           const match = disposition.match(/filename\*?=(?:UTF-8'')?([^;]+)/i);
           return match ? decodeURIComponent(match[1].replace(/['"]/g, "")) : (file.originalName || "report-file");
         })();
 
-        link.href = url;
+        link.href = blobUrl;
         link.download = fileName;
         document.body.appendChild(link);
         link.click();
         link.remove();
-        window.URL.revokeObjectURL(url);
+        window.URL.revokeObjectURL(blobUrl);
         return;
       }
 
       const data = await response.json().catch(() => ({}));
-      if (response.ok && data.url) {
-        window.open(data.url, "_blank", "noopener,noreferrer");
-        return;
-      }
-
       setManagementError(data.message || "Unable to download file");
     } catch (error) {
       setManagementError(error.message || "Unable to prepare download");
@@ -252,7 +276,44 @@ export default function Admin() {
             {!managementLoading && !managementError && adminTab === "messages" && <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Sender</th><th>Subject</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>{messages.map((message) => <tr key={message.id}><td>{message.name}<small>{message.email}</small></td><td>{message.subject}</td><td>{new Date(message.createdAt).toLocaleDateString()}</td><td><span className={`message-status${message.isRead ? " read" : ""}`}>{message.isRead ? "Read" : "Unread"}</span></td><td><button className="btn btn-outline" type="button" onClick={() => { setSelectedItem({ type: "message", item: message }); markMessageRead(message); }}>Read</button>{!message.isRead && <button className="btn btn-outline" type="button" onClick={() => markMessageRead(message)}>Mark read</button>}<button className="btn btn-outline" type="button" onClick={() => deleteMessage(message)}>Delete</button></td></tr>)}</tbody></table>{!messages.length && <p className="sub">No contact messages yet.</p>}</div>}
           </div>
         )}
-        {selectedItem && <div className="modal-backdrop" onClick={() => setSelectedItem(null)}><div className="modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" type="button" onClick={() => setSelectedItem(null)}>×</button><h2>{selectedItem.type === "report" ? selectedItem.item.reference : selectedItem.item.subject}</h2><div className="modal-copy">{selectedItem.type === "report" ? `Employee: ${selectedItem.item.fullName}\nOffice: ${selectedItem.item.office}\nPosition: ${selectedItem.item.position}\nPeriod: ${new Date(selectedItem.item.periodStart).toLocaleDateString()} - ${new Date(selectedItem.item.periodEnd).toLocaleDateString()}\n\n${selectedItem.item.notes || "No notes provided."}` : `${selectedItem.item.name} <${selectedItem.item.email}>\n\n${selectedItem.item.message}`}</div></div></div>}
+        {selectedItem && (
+          <div className="modal-backdrop" onClick={() => setSelectedItem(null)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" type="button" onClick={() => setSelectedItem(null)}>×</button>
+              <h2>{selectedItem.type === "report" ? selectedItem.item.reference : selectedItem.item.subject}</h2>
+              <div className="modal-copy">
+                {selectedItem.type === "report" ? (
+                  <div>
+                    <p style={{ margin: "4px 0" }}><strong>Employee:</strong> {selectedItem.item.fullName}</p>
+                    <p style={{ margin: "4px 0" }}><strong>Office:</strong> {selectedItem.item.office}</p>
+                    <p style={{ margin: "4px 0" }}><strong>Position:</strong> {selectedItem.item.position}</p>
+                    <p style={{ margin: "4px 0" }}><strong>Period:</strong> {new Date(selectedItem.item.periodStart).toLocaleDateString()} - {new Date(selectedItem.item.periodEnd).toLocaleDateString()}</p>
+                    <p style={{ margin: "8px 0" }}><strong>Notes:</strong><br />{selectedItem.item.notes || "No notes provided."}</p>
+                    {selectedItem.item.files && selectedItem.item.files.length > 0 && (
+                      <div style={{ marginTop: 16 }}>
+                        <strong>Attached Files:</strong>
+                        <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 8 }}>
+                          {selectedItem.item.files.map((file) => (
+                            <div key={file.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 8 }}>
+                              <span style={{ fontWeight: 600 }}>{file.originalName}</span>
+                              <button className="btn btn-outline" style={{ padding: "4px 12px", fontSize: 12 }} type="button" onClick={() => downloadReportFile(file)}>
+                                Download
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  `${selectedItem.item.name} <${selectedItem.item.email}>
+
+${selectedItem.item.message}`
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {adminTab === "overview" && <>
         <div className="card admin-stats-panel" style={{ marginBottom: 24 }}>
           <div className="section-head compact"><span className="eyebrow">{t("Overview", "አጠቃላይ እይታ")}</span><h3>{t("Dashboard Statistics", "የዳሽቦርድ ስታቲስቲክስ")}</h3></div>
