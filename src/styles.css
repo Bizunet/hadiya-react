@@ -602,6 +602,23 @@ section{ padding:76px 0; }
 .stat-cell .n{ font-family:var(--font-display); font-size:30px; color:var(--gold); font-weight:700; }
 .stat-cell .l{ font-size:12px; color:var(--ink-faint); margin-top:4px; }
 .admin-stats-panel{ padding:28px; }
+.admin-tabs{ display:flex; gap:8px; margin:0 0 24px; border-bottom:1px solid var(--line); }
+.admin-tabs button{ border:0; border-bottom:3px solid transparent; background:transparent; color:var(--ink-soft); padding:12px 16px; font:inherit; font-weight:700; cursor:pointer; }
+.admin-tabs button.active{ color:var(--accent); border-bottom-color:var(--gold); }
+.admin-management-panel{ padding:28px; }
+.admin-filters{ display:flex; gap:12px; margin-bottom:18px; }
+.admin-filters input,.admin-filters select{ flex:1; min-height:42px; padding:10px 12px; border:1px solid var(--line); background:var(--paper-dim); color:var(--ink); border-radius:var(--radius-sm); }
+.admin-table-wrap{ overflow:auto; }
+.admin-table{ width:100%; border-collapse:collapse; min-width:760px; }
+.admin-table th,.admin-table td{ padding:13px 12px; border-bottom:1px solid var(--line-soft); text-align:left; vertical-align:middle; }
+.admin-table th{ color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spacing:.05em; }
+.admin-table td small{ display:block; color:var(--ink-faint); margin-top:3px; }
+.admin-table td .btn{ padding:7px 10px; margin:2px; font-size:12px; }
+.admin-table select{ padding:7px; border:1px solid var(--line); background:var(--paper-dim); color:var(--ink); }
+.message-status{ color:var(--gold); font-weight:700; }
+.message-status.read{ color:var(--ink-faint); }
+.stat-link{ cursor:pointer; text-align:left; font:inherit; color:inherit; }
+.stat-link:hover{ background:var(--gold-pale); }
 .admin-stat-row{ grid-template-columns:repeat(5,1fr); margin-top:18px; }
 .admin-breakdowns{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:28px; }
 .admin-breakdowns h4, .admin-recent h4{ font-size:16px; margin-bottom:10px; }

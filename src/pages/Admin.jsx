@@ -17,6 +17,14 @@ export default function Admin() {
   const [slideForm, setSlideForm] = useState({ captionEn: "", captionAm: "", order: 0, linkTo: "", isActive: true });
   const [slideImage, setSlideImage] = useState(null);
   const [editingSlide, setEditingSlide] = useState(null);
+  const [adminTab, setAdminTab] = useState("overview");
+  const [reports, setReports] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [managementLoading, setManagementLoading] = useState(false);
+  const [managementError, setManagementError] = useState("");
+  const [reportSearch, setReportSearch] = useState("");
+  const [reportTypeFilter, setReportTypeFilter] = useState("");
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const authHeaders = { Authorization: `Bearer ${localStorage.getItem("authToken") || ""}` };
 
@@ -40,6 +48,77 @@ export default function Admin() {
         if (!response.ok) throw new Error(data.message || "Unable to load slides");
         setSlides(Array.isArray(data) ? data : []);
       });
+  }
+
+  async function loadManagement(tab) {
+    setManagementLoading(true); setManagementError("");
+    try {
+      const endpoint = tab === "reports" ? "/api/reports/admin" : "/api/contact/admin";
+      const response = await fetch(`${API_URL}${endpoint}`, { headers: authHeaders });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to load management data");
+      tab === "reports" ? setReports(data) : setMessages(data);
+    } catch (error) { setManagementError(error.message); }
+    finally { setManagementLoading(false); }
+  }
+
+  useEffect(() => {
+    if (user?.role === "ADMIN" && adminTab !== "overview") loadManagement(adminTab);
+  }, [adminTab, user]);
+
+  async function updateReportStatus(report, nextStatus) {
+    const response = await fetch(`${API_URL}/api/reports/admin/${report.id}/status`, { method: "PATCH", headers: { ...authHeaders, "Content-Type": "application/json" }, body: JSON.stringify({ status: nextStatus }) });
+    if (response.ok) setReports((items) => items.map((item) => item.id === report.id ? { ...item, status: nextStatus } : item));
+    else setManagementError("Unable to update report status");
+  }
+
+  async function downloadReportFile(file) {
+    try {
+      const response = await fetch(`${API_URL}/api/reports/admin/files/${file.id}/download`, { headers: authHeaders });
+
+      const contentType = response.headers.get("content-type") || "";
+      const disposition = response.headers.get("content-disposition") || "";
+
+      if (response.ok && (contentType.startsWith("application/") || disposition.includes("attachment"))) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const fileName = (() => {
+          const match = disposition.match(/filename\*?=(?:UTF-8'')?([^;]+)/i);
+          return match ? decodeURIComponent(match[1].replace(/['"]/g, "")) : (file.originalName || "report-file");
+        })();
+
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        return;
+      }
+
+      const data = await response.json().catch(() => ({}));
+      if (response.ok && data.url) {
+        window.open(data.url, "_blank", "noopener,noreferrer");
+        return;
+      }
+
+      setManagementError(data.message || "Unable to download file");
+    } catch (error) {
+      setManagementError(error.message || "Unable to prepare download");
+    }
+  }
+
+  async function markMessageRead(message) {
+    if (message.isRead) return;
+    const response = await fetch(`${API_URL}/api/contact/admin/${message.id}/read`, { method: "PATCH", headers: authHeaders });
+    if (response.ok) setMessages((items) => items.map((item) => item.id === message.id ? { ...item, isRead: true } : item));
+  }
+
+  async function deleteMessage(message) {
+    if (!window.confirm("Delete this message?")) return;
+    const response = await fetch(`${API_URL}/api/contact/admin/${message.id}`, { method: "DELETE", headers: authHeaders });
+    if (response.ok) setMessages((items) => items.filter((item) => item.id !== message.id));
   }
 
   useEffect(() => {
@@ -160,6 +239,21 @@ export default function Admin() {
       <div className="wrap">
         <div className="section-head"><span className="eyebrow">{t("Administration", "አስተዳደር")}</span><h2>{t("Site Control", "የጣቢያ ቁጥጥር")}</h2></div>
         {status && <div className="notice" style={{ marginBottom: 20 }}>{status}</div>}
+        <div className="admin-tabs" role="tablist">
+          {[['overview', 'Overview'], ['reports', 'Reports Management'], ['messages', 'Contact Messages']].map(([value, label]) => <button key={value} type="button" role="tab" aria-selected={adminTab === value} className={adminTab === value ? "active" : ""} onClick={() => setAdminTab(value)}>{t(label, label)}</button>)}
+        </div>
+        {adminTab !== "overview" && (
+          <div className="card admin-management-panel">
+            <div className="section-head compact"><span className="eyebrow">{adminTab === "reports" ? t("Reports", "ሪፖርቶች") : t("Inbox", "የመልዕክት ሳጥን")}</span><h3>{adminTab === "reports" ? t("Reports Management", "የሪፖርት አስተዳደር") : t("Contact Messages", "የግንኙነት መልዕክቶች")}</h3></div>
+            {adminTab === "reports" && <div className="admin-filters"><input placeholder="Search employee or office" value={reportSearch} onChange={(e) => setReportSearch(e.target.value)} /><select value={reportTypeFilter} onChange={(e) => setReportTypeFilter(e.target.value)}><option value="">All report types</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="custom">Custom</option></select></div>}
+            {managementLoading && <p className="sub">Loading...</p>}
+            {managementError && <div className="notice admin-error">{managementError}</div>}
+            {!managementLoading && !managementError && adminTab === "reports" && <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Employee</th><th>Office</th><th>Type</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>{reports.filter((report) => `${report.fullName} ${report.office}`.toLowerCase().includes(reportSearch.toLowerCase()) && (!reportTypeFilter || report.reportType === reportTypeFilter)).map((report) => <tr key={report.id}><td>{report.fullName}<small>{report.reference}</small></td><td>{report.office}</td><td>{report.reportType}</td><td>{new Date(report.createdAt).toLocaleDateString()}</td><td><select value={report.status || "Pending"} onChange={(e) => updateReportStatus(report, e.target.value)}><option>Pending</option><option>Reviewed</option><option>Approved</option></select></td><td><button className="btn btn-outline" type="button" onClick={() => setSelectedItem({ type: "report", item: report })}>View</button>{report.files.map((file) => <button className="btn btn-outline" type="button" key={file.id} onClick={() => downloadReportFile(file)}>Download</button>)}</td></tr>)}</tbody></table>{!reports.length && <p className="sub">No reports submitted yet.</p>}</div>}
+            {!managementLoading && !managementError && adminTab === "messages" && <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Sender</th><th>Subject</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>{messages.map((message) => <tr key={message.id}><td>{message.name}<small>{message.email}</small></td><td>{message.subject}</td><td>{new Date(message.createdAt).toLocaleDateString()}</td><td><span className={`message-status${message.isRead ? " read" : ""}`}>{message.isRead ? "Read" : "Unread"}</span></td><td><button className="btn btn-outline" type="button" onClick={() => { setSelectedItem({ type: "message", item: message }); markMessageRead(message); }}>Read</button>{!message.isRead && <button className="btn btn-outline" type="button" onClick={() => markMessageRead(message)}>Mark read</button>}<button className="btn btn-outline" type="button" onClick={() => deleteMessage(message)}>Delete</button></td></tr>)}</tbody></table>{!messages.length && <p className="sub">No contact messages yet.</p>}</div>}
+          </div>
+        )}
+        {selectedItem && <div className="modal-backdrop" onClick={() => setSelectedItem(null)}><div className="modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" type="button" onClick={() => setSelectedItem(null)}>×</button><h2>{selectedItem.type === "report" ? selectedItem.item.reference : selectedItem.item.subject}</h2><div className="modal-copy">{selectedItem.type === "report" ? `Employee: ${selectedItem.item.fullName}\nOffice: ${selectedItem.item.office}\nPosition: ${selectedItem.item.position}\nPeriod: ${new Date(selectedItem.item.periodStart).toLocaleDateString()} - ${new Date(selectedItem.item.periodEnd).toLocaleDateString()}\n\n${selectedItem.item.notes || "No notes provided."}` : `${selectedItem.item.name} <${selectedItem.item.email}>\n\n${selectedItem.item.message}`}</div></div></div>}
+        {adminTab === "overview" && <>
         <div className="card admin-stats-panel" style={{ marginBottom: 24 }}>
           <div className="section-head compact"><span className="eyebrow">{t("Overview", "አጠቃላይ እይታ")}</span><h3>{t("Dashboard Statistics", "የዳሽቦርድ ስታቲስቲክስ")}</h3></div>
           {statsLoading && <p className="sub">{t("Loading statistics...", "ስታቲስቲክስ በመጫን ላይ...")}</p>}
@@ -173,7 +267,7 @@ export default function Admin() {
                   ["Contact Messages", "የግንኙነት መልዕክቶች", stats.totalContactMessages],
                   ["Announcements", "ማስታወቂያዎች", stats.totalAnnouncements],
                   ["Last 30 Days", "ያለፉት 30 ቀናት", stats.reportsLast30Days],
-                ].map(([en, am, value]) => <div className="stat-cell" key={en}><div className="n">{value}</div><div className="l">{t(en, am)}</div></div>)}
+                ].map(([en, am, value]) => <button type="button" className={`stat-cell${en === "Total Reports" || en === "Contact Messages" ? " stat-link" : ""}`} key={en} onClick={() => en === "Total Reports" ? setAdminTab("reports") : en === "Contact Messages" ? setAdminTab("messages") : undefined}><div className="n">{value}</div><div className="l">{t(en, am)}</div></button>)}
               </div>
               <div className="admin-breakdowns">
                 <div><h4>{t("Reports by Type", "ሪፖርቶች በአይነት")}</h4>{stats.reportsByType.map((item) => <div className="admin-list-row" key={item.reportType}><span>{item.reportType}</span><strong>{item.count}</strong></div>)}</div>
@@ -216,6 +310,7 @@ export default function Admin() {
             </form>
           ))}
         </div>
+        </>}
       </div>
     </section>
   );
