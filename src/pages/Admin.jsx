@@ -154,21 +154,47 @@ export default function Admin() {
 
   async function deleteReport(report) {
     if (!window.confirm("Delete this report submission?")) return;
+    if (!report?.id) {
+      setManagementError("Unable to delete report");
+      return;
+    }
 
     try {
-      const response = await fetch(`${API_URL}/api/reports/admin/${report.id}`, {
-        method: "DELETE",
-        headers: authHeaders,
-      });
+      const candidates = [
+        `${API_URL}/api/reports/admin/${report.id}`,
+        `${API_URL}/api/reports/${report.id}`,
+      ];
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.message || "Unable to delete report");
+      let lastError = null;
+
+      for (const url of candidates) {
+        try {
+          const response = await fetch(url, {
+            method: "DELETE",
+            headers: authHeaders,
+          });
+
+          if (response.ok) {
+            setReports((items) => items.filter((item) => item.id !== report.id));
+            setSelectedItem((current) => (current?.type === "report" && current.item?.id === report.id ? null : current));
+            showStatus("✓ Report deleted successfully", false);
+            return;
+          }
+
+          const data = await response.json().catch(() => ({}));
+          lastError = new Error(data.message || "Unable to delete report");
+          if (response.status === 404) continue;
+          throw lastError;
+        } catch (error) {
+          lastError = error;
+          if (error instanceof TypeError || error?.message === "Failed to fetch") {
+            continue;
+          }
+          throw error;
+        }
       }
 
-      setReports((items) => items.filter((item) => item.id !== report.id));
-      setSelectedItem((current) => (current?.type === "report" && current.item?.id === report.id ? null : current));
-      showStatus("✓ Report deleted successfully", false);
+      throw lastError || new Error("Unable to delete report");
     } catch (error) {
       setManagementError(error.message || "Unable to delete report");
     }
