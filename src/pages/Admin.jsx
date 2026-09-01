@@ -152,6 +152,28 @@ export default function Admin() {
     if (response.ok) setMessages((items) => items.filter((item) => item.id !== message.id));
   }
 
+  async function deleteReport(report) {
+    if (!window.confirm("Delete this report submission?")) return;
+
+    try {
+      const response = await fetch(`${API_URL}/api/reports/admin/${report.id}`, {
+        method: "DELETE",
+        headers: authHeaders,
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || "Unable to delete report");
+      }
+
+      setReports((items) => items.filter((item) => item.id !== report.id));
+      setSelectedItem((current) => (current?.type === "report" && current.item?.id === report.id ? null : current));
+      showStatus("✓ Report deleted successfully", false);
+    } catch (error) {
+      setManagementError(error.message || "Unable to delete report");
+    }
+  }
+
   useEffect(() => {
     if (user?.role !== "ADMIN") return;
     Promise.all([
@@ -279,7 +301,7 @@ export default function Admin() {
             {adminTab === "reports" && <div className="admin-filters"><input placeholder="Search employee or office" value={reportSearch} onChange={(e) => setReportSearch(e.target.value)} /><select value={reportTypeFilter} onChange={(e) => setReportTypeFilter(e.target.value)}><option value="">All report types</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="custom">Custom</option></select></div>}
             {managementLoading && <p className="sub">Loading...</p>}
             {managementError && <div className="notice admin-error">{managementError}</div>}
-            {!managementLoading && !managementError && adminTab === "reports" && <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Employee</th><th>Office</th><th>Type</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>{reports.filter((report) => `${report.fullName} ${report.office}`.toLowerCase().includes(reportSearch.toLowerCase()) && (!reportTypeFilter || report.reportType === reportTypeFilter)).map((report) => <tr key={report.id}><td>{report.fullName}<small>{report.reference}</small></td><td>{report.office}</td><td>{report.reportType}</td><td>{new Date(report.createdAt).toLocaleDateString()}</td><td><select value={report.status || "Pending"} onChange={(e) => updateReportStatus(report, e.target.value)}><option>Pending</option><option>Reviewed</option><option>Approved</option></select></td><td><button className="btn btn-outline" type="button" onClick={() => setSelectedItem({ type: "report", item: report })}>View</button>{report.files.map((file) => <button className="btn btn-outline" type="button" key={file.id} onClick={() => downloadReportFile(file)}>Download</button>)}</td></tr>)}</tbody></table>{!reports.length && <p className="sub">No reports submitted yet.</p>}</div>}
+            {!managementLoading && !managementError && adminTab === "reports" && <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Employee</th><th>Office</th><th>Type</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>{reports.filter((report) => `${report.fullName} ${report.office}`.toLowerCase().includes(reportSearch.toLowerCase()) && (!reportTypeFilter || report.reportType === reportTypeFilter)).map((report) => <tr key={report.id}><td>{report.fullName}<small>{report.reference}</small></td><td>{report.office}</td><td>{report.reportType}</td><td>{new Date(report.createdAt).toLocaleDateString()}</td><td><select value={report.status || "Pending"} onChange={(e) => updateReportStatus(report, e.target.value)}><option>Pending</option><option>Reviewed</option><option>Approved</option></select></td><td><button className="btn btn-outline" type="button" onClick={() => setSelectedItem({ type: "report", item: report })}>View</button>{(report.files || []).map((file) => <button className="btn btn-outline" type="button" key={file.id} onClick={() => downloadReportFile(file)}>Download</button>)}<button className="btn btn-outline" type="button" onClick={() => deleteReport(report)}>Delete</button></td></tr>)}</tbody></table>{!reports.length && <p className="sub">No reports submitted yet.</p>}</div>}
             {!managementLoading && !managementError && adminTab === "messages" && <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Sender</th><th>Subject</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>{messages.map((message) => <tr key={message.id}><td>{message.name}<small>{message.email}</small></td><td>{message.subject}</td><td>{new Date(message.createdAt).toLocaleDateString()}</td><td><span className={`message-status${message.isRead ? " read" : ""}`}>{message.isRead ? "Read" : "Unread"}</span></td><td><button className="btn btn-outline" type="button" onClick={() => { setSelectedItem({ type: "message", item: message }); markMessageRead(message); }}>Read</button>{!message.isRead && <button className="btn btn-outline" type="button" onClick={() => markMessageRead(message)}>Mark read</button>}<button className="btn btn-outline" type="button" onClick={() => deleteMessage(message)}>Delete</button></td></tr>)}</tbody></table>{!messages.length && <p className="sub">No contact messages yet.</p>}</div>}
           </div>
         )}
@@ -296,16 +318,21 @@ export default function Admin() {
                     <p style={{ margin: "4px 0" }}><strong>Position:</strong> {selectedItem.item.position}</p>
                     <p style={{ margin: "4px 0" }}><strong>Period:</strong> {new Date(selectedItem.item.periodStart).toLocaleDateString()} - {new Date(selectedItem.item.periodEnd).toLocaleDateString()}</p>
                     <p style={{ margin: "8px 0" }}><strong>Notes:</strong><br />{selectedItem.item.notes || "No notes provided."}</p>
-                    {selectedItem.item.files && selectedItem.item.files.length > 0 && (
+                    {(selectedItem.item.files || []).length > 0 && (
                       <div style={{ marginTop: 16 }}>
                         <strong>Attached Files:</strong>
                         <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 8 }}>
-                          {selectedItem.item.files.map((file) => (
+                          {(selectedItem.item.files || []).map((file) => (
                             <div key={file.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 8 }}>
                               <span style={{ fontWeight: 600 }}>{file.originalName}</span>
-                              <button className="btn btn-outline" style={{ padding: "4px 12px", fontSize: 12 }} type="button" onClick={() => downloadReportFile(file)}>
-                                Download
-                              </button>
+                              <div style={{ display: "flex", gap: 8 }}>
+                                <button className="btn btn-outline" style={{ padding: "4px 12px", fontSize: 12 }} type="button" onClick={() => downloadReportFile(file)}>
+                                  Download
+                                </button>
+                                <button className="btn btn-outline" style={{ padding: "4px 12px", fontSize: 12 }} type="button" onClick={() => deleteReport(selectedItem.item)}>
+                                  Delete
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>
