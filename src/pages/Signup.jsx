@@ -35,6 +35,8 @@ export default function Signup() {
     return nextErrors;
   }
 
+  const [success, setSuccess] = useState("");
+
   async function handleSubmit(e) {
     e.preventDefault();
     const nextErrors = validate();
@@ -50,7 +52,10 @@ export default function Signup() {
         form.employeeId.trim(),
         form.password,
       );
-      navigate("/report");
+      setSuccess(t("Account created successfully! Redirecting...", "መለያ በተሳካ ሁኔታ ተፈጠረ! በመስተካከል ላይ..."));
+      setTimeout(() => {
+        navigate("/report");
+      }, 1200);
     } catch (requestError) {
       setErrors({ server: requestError.message });
     }
@@ -88,6 +93,7 @@ export default function Signup() {
               <form onSubmit={handleSubmit}>
                 <h3>{t("Create an employee account", "የሰራተኛ መለያ ይፍጠሩ")}</h3>
                 <p className="sub">{t("Set up your profile to submit reports securely.", "ሪፖርቶችን በደህና ለማስገባት መለያዎን ያዘጋጁ።")}</p>
+                {success && <div className="notice" style={{ display: "block", backgroundColor: "#4caf50", color: "white", marginBottom: 16 }}>{success}</div>}
                 {errors.server && <div className="err-msg" style={{ display: "block" }}>{errors.server}</div>}
 
                 <div className={`field${errors.fullName ? " has-error" : ""}`}>

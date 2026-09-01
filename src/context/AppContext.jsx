@@ -10,8 +10,21 @@ export function AppProvider({ children }) {
     }
     return "light";
   });
-  // Mock authentication — no real backend. Resets on page reload by design (demo only).
   const [user, setUser] = useState(null);
+  const [isRestoring, setIsRestoring] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      try {
+        const stored = localStorage.getItem("authUser");
+        if (stored) {
+          setUser(JSON.parse(stored));
+        }
+      } catch {}
+    }
+    setIsRestoring(false);
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute("lang", lang);
@@ -32,6 +45,7 @@ export function AppProvider({ children }) {
     });
 
     localStorage.setItem("authToken", data.token);
+    localStorage.setItem("authUser", JSON.stringify(data.user));
     setUser(data.user);
   }
   async function register(fullName, email, employeeId, password) {
@@ -41,9 +55,12 @@ export function AppProvider({ children }) {
     });
 
     localStorage.setItem("authToken", data.token);
+    localStorage.setItem("authUser", JSON.stringify(data.user));
     setUser(data.user);
   }
   function logout() {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("authUser");
     setUser(null);
   }
 
@@ -51,6 +68,7 @@ export function AppProvider({ children }) {
     lang, setLang, t,
     theme, setTheme,
     user, login, register, logout,
+    isRestoring,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -77,28 +95,4 @@ async function request(path, options) {
   }
 
   return data;
-}
-
-async function handleSubmit(e) {
-  e.preventDefault();
-
-  const nextErrors = validate();
-
-  if (Object.keys(nextErrors).length > 0) {
-    setErrors(nextErrors);
-    return;
-  }
-
-  try {
-    await register(
-      form.fullName.trim(),
-      form.email.trim(),
-      form.employeeId.trim(),
-      form.password
-    );
-
-    navigate("/report");
-  } catch (error) {
-    setErrors({ server: error.message });
-  }
 }

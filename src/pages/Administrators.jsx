@@ -37,7 +37,7 @@ export default function Administrators() {
       try {
         const response = await fetch(`${API_URL}/api/administrators`);
         const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Unable to load administrators");
+        if (!response.ok) throw new Error(data.message || "");
         setAdministrators(data);
       } catch (error) {
         setLoadError(error.message);

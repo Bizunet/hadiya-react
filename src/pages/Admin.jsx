@@ -28,6 +28,13 @@ export default function Admin() {
 
   const authHeaders = { Authorization: `Bearer ${localStorage.getItem("authToken") || ""}` };
 
+  function showStatus(message, isError = false) {
+    setStatus(message);
+    if (!isError) {
+      setTimeout(() => setStatus(""), 3000);
+    }
+  }
+
   function loadStats() {
     setStatsLoading(true);
     setStatsError("");
@@ -166,7 +173,7 @@ export default function Admin() {
       headers: { Authorization: `Bearer ${localStorage.getItem("authToken") || ""}` },
       body: formData,
     });
-    setStatus(response.ok ? "Administrator updated" : "Unable to update administrator");
+    showStatus(response.ok ? "✓ Administrator updated successfully" : "Unable to update administrator", !response.ok);
   }
 
   async function createAnnouncement(event) {
@@ -184,9 +191,9 @@ export default function Admin() {
       setAnnouncements((current) => [announcement, ...current]);
       setTitle("");
       setBody("");
-      setStatus("Announcement published");
+      showStatus("✓ Announcement published successfully", false);
     } else {
-      setStatus("Unable to publish announcement");
+      showStatus("Unable to publish announcement", true);
     }
   }
 
@@ -217,7 +224,7 @@ export default function Admin() {
     const formData = new FormData();
     const image = event.currentTarget.elements.image.files[0];
     if (!editingSlide && !image) {
-      setStatus(t("Please choose a JPG or PNG image", "እባክዎ የJPG ወይም PNG ምስል ይምረጡ"));
+      showStatus(t("Please choose a JPG or PNG image", "እባክዎ የJPG ወይም PNG ምስል ይምረጡ"), true);
       return;
     }
     if (image) formData.append("image", image);
@@ -232,11 +239,11 @@ export default function Admin() {
     if (response.ok) {
       const slide = await response.json();
       setSlides((current) => editingSlide ? current.map((item) => item.id === slide.id ? slide : item) : [...current, slide].sort((a, b) => a.order - b.order));
-      setStatus(editingSlide ? t("Slide updated", "ስላይዱ ተዘምኗል") : t("Slide added", "ስላይድ ተጨምሯል"));
+      showStatus(editingSlide ? t("✓ Slide updated successfully", "✓ ስላይዱ በተሳካ ሁኔታ ተዘምኗል") : t("✓ Slide added successfully", "✓ ስላይድ በተሳካ ሁኔታ ተጨምሯል"), false);
       resetSlideForm();
     } else {
       const data = await response.json().catch(() => ({}));
-      setStatus(data.message || (editingSlide ? "Unable to update slide" : "Unable to add slide"));
+      showStatus(data.message || (editingSlide ? "Unable to update slide" : "Unable to add slide"), true);
     }
   }
 
@@ -245,10 +252,10 @@ export default function Admin() {
     const response = await fetch(`${API_URL}/api/slides/${slide.id}`, { method: "DELETE", headers: authHeaders });
     if (response.ok) {
       setSlides((current) => current.filter((item) => item.id !== slide.id));
-      setStatus(t("Slide deleted", "ስላይዱ ተሰርዟል"));
+      showStatus(t("✓ Slide deleted successfully", "✓ ስላይዱ በተሳካ ሁኔታ ተሰርዟል"), false);
       if (editingSlide?.id === slide.id) resetSlideForm();
     } else {
-      setStatus("Unable to delete slide");
+      showStatus("Unable to delete slide", true);
     }
   }
 

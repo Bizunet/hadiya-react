@@ -12,6 +12,8 @@ export default function Login() {
   const [error, setError] = useState(false);
   const [serverError, setServerError] = useState("");
 
+  const [success, setSuccess] = useState("");
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!id.trim() || password.length < 6) {
@@ -21,7 +23,10 @@ export default function Login() {
 
     try {
       await login(id.trim(), password);
-      navigate("/report");
+      setSuccess(t("Successfully logged in! Redirecting...", "በተሳካ ሁኔታ ገቡ! በመስተካከል ላይ..."));
+      setTimeout(() => {
+        navigate("/report");
+      }, 1200);
     } catch (requestError) {
       setServerError(requestError.message);
     }
@@ -53,7 +58,8 @@ export default function Login() {
               <form onSubmit={handleSubmit}>
                 <h3>{t("Employee Sign In", "የሰራተኛ መግቢያ")}</h3>
                 <p className="sub">{t("Enter your employee ID and password to continue.", "ለመቀጠል የሰራተኛ መለያ ቁጥርዎንና የይለፍ ቃልዎን ያስገቡ።")}</p>
-                {serverError && <div className="err-msg" style={{ display: "block" }}>{serverError}</div>}
+              {success && <div className="notice" style={{ display: "block", backgroundColor: "#4caf50", color: "white", marginBottom: 16 }}>{success}</div>}
+              {serverError && <div className="err-msg" style={{ display: "block" }}>{serverError}</div>}
 
                 <div className={`field${error && !id.trim() ? " has-error" : ""}`}>
                   <label>{t("Employee ID *", "የሰራተኛ መለያ ቁጥር *")}</label>
