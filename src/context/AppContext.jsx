@@ -5,9 +5,9 @@ const AppContext = createContext(null);
 export function AppProvider({ children }) {
   const [lang, setLang] = useState("en");
   const [theme, setTheme] = useState(() => {
-    if (typeof window !== "undefined" && window.matchMedia) {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    }
+    if (typeof window === "undefined") return "light";
+    const savedTheme = localStorage.getItem("site-theme");
+    if (savedTheme === "light" || savedTheme === "dark") return savedTheme;
     return "light";
   });
   const [user, setUser] = useState(null);
@@ -32,6 +32,9 @@ export function AppProvider({ children }) {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("site-theme", theme);
+    }
   }, [theme]);
 
   function t(en, am) {

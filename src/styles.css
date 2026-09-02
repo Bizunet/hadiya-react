@@ -524,6 +524,9 @@ section{ padding:76px 0; }
 .value-mark{ width:30px; height:30px; margin-bottom:14px; color:var(--gold); }
 .value-card .v-am{ font-family:var(--font-am-display); font-weight:600; font-size:15.5px; color:var(--gold); line-height:1.5; }
 .value-card .v-en{ font-size:12.5px; color:var(--ink-faint); margin-top:6px; }
+.values-header{ margin-top:32px; }
+.values-head{ margin-bottom:0; }
+.values-head h2{ margin-top:8px; }
 
 /* announcements */
 .announce-list{ display:grid; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; }
@@ -585,10 +588,10 @@ section{ padding:76px 0; }
 .breadcrumb a:hover{ text-decoration:underline; }
 
 /* ---------------------------------------------------------- about page */
-.timeline-org{ display:grid; gap:14px; }
+.timeline-org{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
 .org-node{
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius-md);
-  padding:18px 20px; display:flex; align-items:center; gap:16px;
+  padding:18px 20px; display:flex; align-items:center; gap:16px; min-height:92px;
 }
 .org-node .num{ font-family:var(--font-display); font-weight:700; color:var(--gold); font-size:15px; width:26px; }
 .org-node.head{ background:var(--deep); color:#fff; border-color:var(--deep); }
@@ -596,6 +599,10 @@ section{ padding:76px 0; }
 .org-node.head p{ color:#D6E4F2; font-size:13px; }
 .org-node h4{ font-size:15px; }
 .org-node p{ font-size:12.5px; color:var(--ink-faint); margin-top:2px; }
+.org-node-copy{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+.org-node-am{ font-family:var(--font-am-display); font-size:15px; color:var(--ink-soft); line-height:1.5; }
+.org-node.head .org-node-copy h4,
+.org-node.head .org-node-copy p{ color:#fff; }
 
 .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; margin-top:14px; }
 .stat-cell{ background:var(--card); padding:22px; text-align:center; }
@@ -804,6 +811,7 @@ footer{ background:var(--deep-dark); color:#A9C3DA; padding:60px 0 26px; margin-
 .footer-brand .seal{ --sz:42px; }
 .footer-brand .am{ color:#fff; font-family:var(--font-am-display); font-size:14.5px; font-weight:600; line-height:1.5; }
 .footer-brand .en{ font-size:11.5px; color:#86A9C7; margin-top:4px; }
+.footer-tagline{ margin-top:12px; font-size:12.5px; line-height:1.6; color:#D6E4F2; }
 .footer-col h5{ color:#fff; font-size:12.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin-bottom:16px; }
 .footer-col ul{ display:grid; gap:10px; }
 .footer-col li > span{ display:flex; align-items:flex-start; gap:8px; }

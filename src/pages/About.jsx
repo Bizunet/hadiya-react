@@ -61,7 +61,7 @@ export default function About() {
           <div className="timeline-org" data-stagger>
             <Reveal as="div" className="org-node head">
               <span className="num">—</span>
-              <div>
+              <div className="org-node-copy">
                 <h4>{t("Department Head", "የመምሪያ ሀላፊ")}</h4>
                 <p>{t("Overall leadership and accountability for the department", "የመምሪያው አጠቃላይ አመራርና ተጠያቂነት")}</p>
               </div>
@@ -72,7 +72,10 @@ export default function About() {
                 <div className="node-avatar" style={{ background: "var(--paper-dim)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold)" }}>
                   <TeamIcon name={team.icon} width={30} height={30} />
                 </div>
-                <div><h4>{t(team.en, team.am)}</h4></div>
+                <div className="org-node-copy">
+                  <h4>{team.en}</h4>
+                  <p className="org-node-am">{team.am}</p>
+                </div>
               </Reveal>
             ))}
           </div>
@@ -99,6 +102,13 @@ export default function About() {
               <h3>{t("Vision (ራዕይ)", "ራዕይ (Vision)")}</h3>
               <p className="mv-am">በ 2022 ተለዕኮዉን በዉጤታማነት መፈጸም የቻለ በስነምግባሩ የተመሰገነ ንጻ ገለልተኛና ብቃት ያለዉ የመንግስታገልግሎት ዘርፍና አገልጋይ ዕዉን ሆኖ ማየት።</p>
               <p className="mv-en">To see, by 2022 (E.C.), a public service sector and public servant that has effectively carried out its mission — recognized for integrity, transparent, impartial, and competent.</p>
+            </Reveal>
+          </div>
+
+          <div className="values-header" data-stagger>
+            <Reveal as="div" className="section-head values-head">
+              <span className="eyebrow">{t("Values", "እሴቶች")}</span>
+              <h2>{t("Values", "እሴቶች")}</h2>
             </Reveal>
           </div>
 

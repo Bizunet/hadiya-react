@@ -269,6 +269,10 @@ function Footer() {
             <div>
               <div className="am">የሀድያ ዞን ፐብሊክ ሰርቪስና የሰዉ ኃብት ልማት መምሪያ</div>
               <div className="en">Central Ethiopia Regional State</div>
+              <div className="footer-tagline">{t(
+                "Built by transforming how offices work, and how employees are heard.",
+                "የጽ/ቤቶችን አሰራርና የሰራተኞችን ድምጽ በመለወጥ የተገነባ።"
+              )}</div>
             </div>
           </div>
 
